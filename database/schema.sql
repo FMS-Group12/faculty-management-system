@@ -1,28 +1,65 @@
-USE faculty_management_system;
+CREATE DATABASE faculty_management_system;
 
-INSERT INTO users (username, password, role) VALUES
-('admin', 'admin123', 'ADMIN'),
-('student1', 'student123', 'STUDENT'),
-('lecturer1', 'lecturer123', 'LECTURER');
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('ADMIN','STUDENT','LECTURER') NOT NULL
+);
 
-INSERT INTO departments (department_name, hod_name, staff_count) VALUES
-('Computing', 'Dr. Silva', 20),
-('Technology', 'Dr. Perera', 15);
+CREATE TABLE departments (
+    department_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    hod VARCHAR(100),
+    no_of_staff INT,
+    degree_id INT   
+);
 
-INSERT INTO degrees (degree_name, department_id) VALUES
-('BSc Computer Science', 1),
-('BSc Information Technology', 2);
+CREATE TABLE degrees (
+    degree_id INT AUTO_INCREMENT PRIMARY KEY,
+    degree VARCHAR(100),
+    department_id INT,
+    no_of_students INT,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
 
-INSERT INTO students (registration_no, name, email, mobile, degree_id, user_id) VALUES
-('CS001', 'Nimal Perera', 'nimal@gmail.com', '0771234567', 1, 2);
+CREATE TABLE students (
+    student_id VARCHAR(20) PRIMARY KEY,
+    fullname VARCHAR(100),
+    email VARCHAR(100),
+    mobile_no VARCHAR(15),
+    degree_id INT,
+    user_id INT,
+    FOREIGN KEY (degree_id) REFERENCES degrees(degree_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
-INSERT INTO lecturers (name, email, department_id, user_id) VALUES
-('Dr. Kamal', 'kamal@gmail.com', 1, 3);
+CREATE TABLE lecturers (
+    lecturer_id INT AUTO_INCREMENT PRIMARY KEY,
+    fullname VARCHAR(100),
+    email VARCHAR(100),
+    mobile_no VARCHAR(15),
+    department_id INT,
+    user_id INT,
+    course_code VARCHAR(20),
+    FOREIGN KEY (department_id) REFERENCES departments(department_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
-INSERT INTO courses (course_code, course_name, lecturer_id) VALUES
-('CS101', 'Programming Fundamentals', 1),
-('CS102', 'Database Systems', 1);
+CREATE TABLE courses (
+    course_code VARCHAR(20) PRIMARY KEY,
+    course_name VARCHAR(100),
+    credits INT,
+    lecturer_id INT,
+    FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id)
+);
 
-INSERT INTO enrollments (student_id, course_id, grade) VALUES
-(1, 1, 'A'),
-(1, 2, 'B+');
+CREATE TABLE enrollments (
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(20),
+    course_code VARCHAR(20),
+    grade VARCHAR(5),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (course_code) REFERENCES courses(course_code)
+);
+
