@@ -18,7 +18,7 @@ CREATE TABLE degrees (
     degree_id INT AUTO_INCREMENT PRIMARY KEY,
     degree VARCHAR(100),
     department_name VARCHAR(200),
-    no_of_students INT,
+    no_of_students INT
 );
 
 CREATE TABLE students (
@@ -59,5 +59,6 @@ CREATE TABLE enrollments (
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (course_code) REFERENCES courses(course_code)
 );
+
 
 
