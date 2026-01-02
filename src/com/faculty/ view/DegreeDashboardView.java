@@ -5,8 +5,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.util.Vector;
 
 public class DegreeDashboardView extends JFrame {
+
+    // Inside DegreeDashboardView class
+    private DegreeDAO degreeDAO = new DegreeDAO();
     // --- COLOR PALETTE (Sage Green Theme) ---
     private final Color CLR_BG = new Color(235, 233, 225);
     private final Color CLR_HEADER_BG = new Color(70, 75, 60);  // Dark Olive
@@ -78,8 +82,9 @@ public class DegreeDashboardView extends JFrame {
 
         buttonPanel.add(btnStudents);
         buttonPanel.add(btnLecturers);
-        buttonPanel.add(btnDegrees);
         buttonPanel.add(btnDepartments);
+        buttonPanel.add(btnDegrees);
+       
         buttonPanel.add(btnLogout);
 
         navPanel.add(buttonPanel, BorderLayout.EAST);
@@ -117,9 +122,9 @@ public class DegreeDashboardView extends JFrame {
         controlsPanel.setBackground(CLR_BG);
         controlsPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
 
-        JButton btnAdd = createActionButton("Add new", true);
-        JButton btnEdit = createActionButton("Edit", false);
-        JButton btnDelete = createActionButton("Delete", false);
+        JButton btnAdd = createActionButton("Add", true);
+        JButton btnEdit = createActionButton("Edit", true);
+        JButton btnDelete = createActionButton("Delete", true);
 
         btnAdd.addActionListener(e -> showAddDegreeDialog());
         btnEdit.addActionListener(e -> showEditDegreeDialog());
@@ -151,60 +156,63 @@ public class DegreeDashboardView extends JFrame {
 
         return panel;
     }
-    private void deleteSelectedRow() {
-        int selectedRow = degreeTable.getSelectedRow();
-        if (selectedRow != -1) {
-            if (JOptionPane.showConfirmDialog(this, "Delete selected degree?", "Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                degreeTableModel.removeRow(selectedRow);
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select a row to delete.");
-        }
-    }
     private void showAddDegreeDialog() {
         JTextField txtDegree = new JTextField();
         JTextField txtDepartment = new JTextField();
         JTextField txtNoOfStudents = new JTextField();
+        Object[] message = {"Degree Name:", txtDegree, "Department:", txtDepartment, "No of Students:", txtNoOfStudents};
 
-        Object[] message = {"Degree Name:", txtDegree, "Department name:", txtDepartment, "number of students:", txtNoOfStudents};
+        if (JOptionPane.showConfirmDialog(this, message, "Add Degree", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            String name = txtDegree.getText();
+            String dept = txtDepartment.getText();
+            int students = Integer.parseInt(txtNoOfStudents.getText().trim());
 
-        if (JOptionPane.showConfirmDialog(this, message, "Add New Department", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            if (!txtDegree.getText().isEmpty()) {
-                degreeTableModel.addRow(new Object[]{txtDegree.getText(), txtDepartment.getText(), txtNoOfStudents.getText()});
+            if (degreeDAO.addDegree(name, dept, students)) {
+                degreeTableModel.addRow(new Object[]{name, dept, String.valueOf(students)});
             }
         }
     }
 
-        private void showEditDegreeDialog() {
-            int selectedRow = degreeTable.getSelectedRow();
-            if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(this, "Please select a row to edit.");
-                return;
-            }
+    private void showEditDegreeDialog() {
+        int selectedRow = degreeTable.getSelectedRow();
+        if (selectedRow == -1) return;
 
-            JTextField txtDegree1 = new JTextField((String) degreeTableModel.getValueAt(selectedRow, 0));
-            JTextField txtDepartment1 = new JTextField((String) degreeTableModel.getValueAt(selectedRow, 1));
-            JTextField txtNoOfStudents1 = new JTextField((String) degreeTableModel.getValueAt(selectedRow, 2));
-            Object[] message1 = {"Degree Name:", txtDegree1, "Department:", txtDepartment1,"No of students :", txtNoOfStudents1};
+        String oldName = (String) degreeTableModel.getValueAt(selectedRow, 0);
+        JTextField txtDegree = new JTextField(oldName);
+        JTextField txtDept = new JTextField((String) degreeTableModel.getValueAt(selectedRow, 1));
+        JTextField txtStudents = new JTextField(degreeTableModel.getValueAt(selectedRow, 2).toString());
 
-            if (JOptionPane.showConfirmDialog(this, message1, "Edit Degree", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                degreeTableModel.setValueAt(txtDegree1.getText(), selectedRow, 0);
-                degreeTableModel.setValueAt(txtDepartment1.getText(), selectedRow, 1);
-                degreeTableModel.setValueAt(txtNoOfStudents1.getText(), selectedRow, 2);
+        Object[] message = {"Degree Name:", txtDegree, "Department:", txtDept, "Students:", txtStudents};
+
+        if (JOptionPane.showConfirmDialog(this, message, "Edit Degree", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (degreeDAO.updateDegree(oldName, txtDegree.getText(), txtDept.getText(), Integer.parseInt(txtStudents.getText()))) {
+                degreeTableModel.setValueAt(txtDegree.getText(), selectedRow, 0);
+                degreeTableModel.setValueAt(txtDept.getText(), selectedRow, 1);
+                degreeTableModel.setValueAt(txtStudents.getText(), selectedRow, 2);
             }
         }
+    }
+    private void deleteSelectedRow() {
+        int selectedRow = degreeTable.getSelectedRow();
+        if (selectedRow != -1) {
+            String degreeName = (String) degreeTableModel.getValueAt(selectedRow, 0);
+            if (JOptionPane.showConfirmDialog(this, "Delete " + degreeName + "?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                if (degreeDAO.deleteDegree(degreeName)) {
+                    degreeTableModel.removeRow(selectedRow);
+                }
+            }
+        }
+    }
     private JScrollPane createDegreeTable() {
         String[] columns = {"Degree", "Department", "No of Students"};
-        Object[][] data = {
-                {"Applied Computing", "Engineering Technology", "15"},
-                {"Software Engineering", "Information Technology", "17"},
-                {"Computer Systems Engineering", "Computer Science", "12"}
-        };
-        degreeTableModel = new DefaultTableModel(data, columns) {
+
+        // Fetch data from Database instead of hardcoded array
+        Vector<Vector<Object>> data = degreeDAO.getAllDegrees();
+
+        degreeTableModel = new DefaultTableModel(data, new Vector<>(java.util.Arrays.asList(columns))) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
-
         degreeTable = new JTable(degreeTableModel);
         degreeTable.setRowHeight(45);
         degreeTable.setFont(FONT_CELL);
@@ -274,11 +282,7 @@ public class DegreeDashboardView extends JFrame {
         }
     }
 
-
-
-
-
-        public static void main(String[] args) {
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new DegreeDashboardView().setVisible(true);
         });
