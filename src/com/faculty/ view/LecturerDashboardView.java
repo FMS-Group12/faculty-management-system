@@ -1,4 +1,4 @@
-package view;
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -152,7 +152,7 @@ public class LecturerDashboardView extends JFrame {
 
         Object[] fields = {
                 "Full Name:", nameF,
-                "Department ID:", deptIdF, // User enters the ID here
+                "Department:", deptIdF, // User enters the ID here
                 "Courses:", courF,
                 "Email:", emailF,
                 "Mobile No:", mobF
@@ -288,4 +288,5 @@ public class LecturerDashboardView extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LecturerDashboardView().setVisible(true));
     }
+
 }
