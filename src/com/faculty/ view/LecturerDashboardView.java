@@ -57,7 +57,7 @@ public class LecturerDashboardView extends JFrame {
         bottomPanel.setBorder(new javax.swing.border.EmptyBorder(10, 0, 40, 0));
 
         JButton btnSave = new JButton("Save changes");
-        btnSave.setPreferredSize(new Dimension(300, 50));
+        btnSave.setPreferredSize(new Dimension(200, 40));
         btnSave.setBackground(new Color(162, 82, 45)); // Purple theme
         btnSave.setForeground(Color.WHITE);
         btnSave.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -290,3 +290,4 @@ public class LecturerDashboardView extends JFrame {
     }
 
 }
+
