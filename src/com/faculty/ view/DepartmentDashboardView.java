@@ -5,15 +5,22 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.sql.*;
+import java.util.Vector;
 
 public class DepartmentDashboardView extends JFrame {
 
+    // --- DATABASE CONFIGURATION ---
+    private final String DB_URL = "jdbc:mysql://localhost:3306/faculty_management_system";
+    private final String DB_USER = "root";
+    private final String DB_PASS = "";
+
     // --- COLOR PALETTE (Sage Green Theme) ---
     private final Color CLR_BG = new Color(235, 233, 225);
-    private final Color CLR_HEADER_BG = new Color(70, 75, 60);  // Dark Olive
-    private final Color CLR_ACCENT = new Color(155, 150, 130);  // Sage
+    private final Color CLR_HEADER_BG = new Color(70, 75, 60);
+    private final Color CLR_ACCENT = new Color(155, 150, 130);
     private final Color CLR_NAV_BAR = new Color(225, 223, 215);
-    private final Color CLR_SAVE_BTN = new Color(165, 82, 45);  // Terracotta
+    private final Color CLR_SAVE_BTN = new Color(165, 82, 45);
 
     // Fonts
     private final Font FONT_TITLE = new Font("Serif", Font.ITALIC | Font.BOLD, 36);
@@ -26,9 +33,9 @@ public class DepartmentDashboardView extends JFrame {
     private DefaultTableModel departmentTableModel;
     private JTable departmentTable;
 
-    // --- Constructor ---
     public DepartmentDashboardView() {
         initializeUI();
+        loadDepartmentsFromDB(); // <--- Loads data immediately on startup
     }
 
     private void initializeUI() {
@@ -37,90 +44,201 @@ public class DepartmentDashboardView extends JFrame {
         setSize(1000, 800);
         setLocationRelativeTo(null);
 
-        // Main container
         JPanel rootPanel = new JPanel(new BorderLayout());
         rootPanel.setBackground(CLR_BG);
         setContentPane(rootPanel);
 
-        // 1. Add navigation bar
         rootPanel.add(createTopNavBar(), BorderLayout.NORTH);
-
-        // 2. Add departments content area
         rootPanel.add(createDepartmentsContent(), BorderLayout.CENTER);
     }
 
     // =========================================================
-    // 1. NAVIGATION BAR
+    // 1. BACKEND LOGIC (DATABASE OPERATIONS)
     // =========================================================
-    private JPanel createTopNavBar() {
-        JPanel navPanel = new JPanel(new BorderLayout());
-        navPanel.setBackground(CLR_NAV_BAR);
-        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, CLR_ACCENT));
-        navPanel.setPreferredSize(new Dimension(getWidth(), 60));
 
-        JLabel lblWelcome = new JLabel("  Welcome, Admin");
-        lblWelcome.setFont(FONT_NAV);
-        lblWelcome.setForeground(CLR_HEADER_BG);
-        navPanel.add(lblWelcome, BorderLayout.WEST);
+    // --- LOAD (READ) ---
+    private void loadDepartmentsFromDB() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM departments")) {
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
-        buttonPanel.setBackground(CLR_NAV_BAR);
+            departmentTableModel.setRowCount(0); // Clear current table data
 
-        // Navigation Buttons
-        JButton btnStudents = createNavButton("Students");
-        JButton btnLecturers = createNavButton("Lecturers");
-        JButton btnDepartments = createNavButton("Departments");
-        JButton btnDegrees = createNavButton("Degrees");
-        JButton btnLogout = createNavButton("Logout");
-        btnLogout.setForeground(new Color(180, 50, 50));
-
-        // --- NAVIGATION LOGIC ---
-        btnDegrees.addActionListener(e -> {
-            new DegreeDashboardView().setVisible(true); // Open Degrees page
-            this.dispose(); // Close current Department Dashboard
-        });
-
-        btnLogout.addActionListener(e -> {
-            if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                this.dispose(); // Close application or return to login
+            while (rs.next()) {
+                Vector<Object> row = new Vector<>();
+                row.add(rs.getInt("department_id")); // ID (Hidden or visible)
+                row.add(rs.getString("name"));
+                row.add(rs.getString("hod"));
+                row.add(rs.getInt("no_of_staff"));
+                departmentTableModel.addRow(row);
             }
-        });
-
-        // Add buttons to panel
-        buttonPanel.add(btnStudents);
-        buttonPanel.add(btnLecturers);
-        buttonPanel.add(btnDepartments);
-        buttonPanel.add(btnDegrees);
-        buttonPanel.add(btnLogout);
-
-        navPanel.add(buttonPanel, BorderLayout.EAST);
-        return navPanel;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading data: " + e.getMessage());
+        }
     }
 
-    private JButton createNavButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(FONT_NAV);
-        btn.setForeground(CLR_HEADER_BG);
-        btn.setBackground(CLR_NAV_BAR);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setForeground(CLR_ACCENT.darker()); }
-            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setForeground(CLR_HEADER_BG); }
-        });
-        return btn;
+    // --- ADD (INSERT) ---
+    private void addDepartmentToDB(String name, String hod, int staff) {
+        String sql = "INSERT INTO departments (name, hod, no_of_staff) VALUES (?, ?, ?)";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, hod);
+            pstmt.setInt(3, staff);
+            pstmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Department Added Successfully!");
+            loadDepartmentsFromDB(); // Refresh the table
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error adding: " + e.getMessage());
+        }
+    }
+
+    // --- EDIT (UPDATE) ---
+    private void updateDepartmentInDB(int id, String name, String hod, int staff) {
+        String sql = "UPDATE departments SET name=?, hod=?, no_of_staff=? WHERE department_id=?";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, hod);
+            pstmt.setInt(3, staff);
+            pstmt.setInt(4, id);
+
+            int rows = pstmt.executeUpdate();
+            if(rows > 0) {
+                JOptionPane.showMessageDialog(this, "Department Updated Successfully!");
+                loadDepartmentsFromDB(); // Refresh the table
+            } else {
+                JOptionPane.showMessageDialog(this, "Update failed. ID not found.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error updating: " + e.getMessage());
+        }
+    }
+
+    // --- DELETE (DELETE) ---
+    private void deleteDepartmentFromDB(int id) {
+        String sql = "DELETE FROM departments WHERE department_id = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Department Deleted!");
+            loadDepartmentsFromDB(); // Refresh the table
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error deleting: " + e.getMessage());
+        }
     }
 
     // =========================================================
-    // 2. CONTENT AREA (DEPARTMENTS LOGIC)
+    // 2. UI ACTIONS (Dialogs & Buttons)
     // =========================================================
+
+    private void showAddDepartmentDialog() {
+        JTextField txtName = new JTextField();
+        JTextField txtHOD = new JTextField();
+        JTextField txtStaff = new JTextField();
+
+        Object[] message = {
+                "Department Name:", txtName,
+                "Head of Dept (HOD):", txtHOD,
+                "No of Staff:", txtStaff
+        };
+
+        int option = JOptionPane.showConfirmDialog(this, message, "Add New Department", JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                if (txtName.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Name is required!");
+                    return;
+                }
+                String name = txtName.getText();
+                String hod = txtHOD.getText();
+                int staff = Integer.parseInt(txtStaff.getText()); // Converts text to number
+
+                addDepartmentToDB(name, hod, staff); // <--- CALL BACKEND
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Staff count must be a valid number!");
+            }
+        }
+    }
+
+    private void showEditDepartmentDialog() {
+        int selectedRow = departmentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a row to edit.");
+            return;
+        }
+
+        // Get current values from the table to fill the inputs
+        int id = (int) departmentTable.getValueAt(selectedRow, 0); // ID is in column 0
+        String currentName = (String) departmentTable.getValueAt(selectedRow, 1);
+        String currentHOD = (String) departmentTable.getValueAt(selectedRow, 2);
+        String currentStaff = String.valueOf(departmentTable.getValueAt(selectedRow, 3));
+
+        JTextField txtName = new JTextField(currentName);
+        JTextField txtHOD = new JTextField(currentHOD);
+        JTextField txtStaff = new JTextField(currentStaff);
+
+        Object[] message = {
+                "Department Name:", txtName,
+                "Head of Dept (HOD):", txtHOD,
+                "No of Staff:", txtStaff
+        };
+
+        int option = JOptionPane.showConfirmDialog(this, message, "Edit Department", JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                String name = txtName.getText();
+                String hod = txtHOD.getText();
+                int staff = Integer.parseInt(txtStaff.getText());
+
+                updateDepartmentInDB(id, name, hod, staff); // <--- CALL BACKEND
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Staff count must be a valid number!");
+            }
+        }
+    }
+
+    private void deleteSelectedRow() {
+        int selectedRow = departmentTable.getSelectedRow();
+        if (selectedRow != -1) {
+            // Get the ID from column 0
+            int id = (int) departmentTable.getValueAt(selectedRow, 0);
+
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete Department ID: " + id + "?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                deleteDepartmentFromDB(id); // <--- CALL BACKEND
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a row to delete.");
+        }
+    }
+
+    // =========================================================
+    // 3. UI LAYOUT
+    // =========================================================
+
     private JPanel createDepartmentsContent() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(CLR_BG);
         panel.setBorder(new EmptyBorder(30, 50, 30, 50));
 
-        // Title
         JLabel lblTitle = new JLabel("Departments", SwingConstants.CENTER);
         lblTitle.setFont(FONT_TITLE);
         lblTitle.setForeground(CLR_HEADER_BG);
@@ -130,7 +248,7 @@ public class DepartmentDashboardView extends JFrame {
         JPanel centerContainer = new JPanel(new BorderLayout());
         centerContainer.setBackground(CLR_BG);
 
-        // Controls (Add/Edit/Delete)
+        // Control Buttons
         JPanel controlsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         controlsPanel.setBackground(CLR_BG);
         controlsPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
@@ -148,90 +266,31 @@ public class DepartmentDashboardView extends JFrame {
         controlsPanel.add(btnDelete);
         centerContainer.add(controlsPanel, BorderLayout.NORTH);
 
-        // Table
         centerContainer.add(createDepartmentTable(), BorderLayout.CENTER);
         panel.add(centerContainer, BorderLayout.CENTER);
 
-        // Save Button
+        // Save Button (Not strictly needed since Add/Edit save instantly, but kept for UI consistency)
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.setBackground(CLR_BG);
         bottomPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
-
-        JButton btnSave = new JButton("Save changes");
+        JButton btnSave = new JButton("Refresh Data");
         btnSave.setFont(new Font("SansSerif", Font.BOLD, 14));
         btnSave.setForeground(Color.WHITE);
         btnSave.setBackground(CLR_SAVE_BTN);
         btnSave.setPreferredSize(new Dimension(200, 40));
         btnSave.setFocusPainted(false);
-        btnSave.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnSave.addActionListener(e -> JOptionPane.showMessageDialog(this, "Changes saved successfully!"));
-
+        btnSave.addActionListener(e -> loadDepartmentsFromDB());
         bottomPanel.add(btnSave);
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
         return panel;
     }
 
-    // =========================================================
-    // 3. LOGIC IMPLEMENTATION
-    // =========================================================
-    private void deleteSelectedRow() {
-        int selectedRow = departmentTable.getSelectedRow();
-        if (selectedRow != -1) {
-            if (JOptionPane.showConfirmDialog(this, "Delete selected department?", "Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                departmentTableModel.removeRow(selectedRow);
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select a row to delete.");
-        }
-    }
-
-    private void showAddDepartmentDialog() {
-        JTextField txtName = new JTextField();
-        JTextField txtHOD = new JTextField();
-        JTextField txtDegree = new JTextField();
-        JTextField txtStaff = new JTextField();
-        Object[] message = {"Department Name:", txtName, "Head of Dept (HOD):", txtHOD, "Related Degree:", txtDegree, "No of Staff:", txtStaff};
-
-        if (JOptionPane.showConfirmDialog(this, message, "Add New Department", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            if (!txtName.getText().isEmpty()) {
-                departmentTableModel.addRow(new Object[]{txtName.getText(), txtHOD.getText(), txtDegree.getText(), txtStaff.getText()});
-            }
-        }
-    }
-
-    private void showEditDepartmentDialog() {
-        int selectedRow = departmentTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a row to edit.");
-            return;
-        }
-        JTextField txtName = new JTextField((String) departmentTableModel.getValueAt(selectedRow, 0));
-        JTextField txtHOD = new JTextField((String) departmentTableModel.getValueAt(selectedRow, 1));
-        JTextField txtDegree = new JTextField((String) departmentTableModel.getValueAt(selectedRow, 2));
-        JTextField txtStaff = new JTextField((String) departmentTableModel.getValueAt(selectedRow, 3));
-        Object[] message = {"Department Name:", txtName, "Head of Dept (HOD):", txtHOD, "Related Degree:", txtDegree, "No of Staff:", txtStaff};
-
-        if (JOptionPane.showConfirmDialog(this, message, "Edit Department", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            departmentTableModel.setValueAt(txtName.getText(), selectedRow, 0);
-            departmentTableModel.setValueAt(txtHOD.getText(), selectedRow, 1);
-            departmentTableModel.setValueAt(txtDegree.getText(), selectedRow, 2);
-            departmentTableModel.setValueAt(txtStaff.getText(), selectedRow, 3);
-        }
-    }
-
-    // =========================================================
-    // 4. TABLE CONFIGURATION
-    // =========================================================
     private JScrollPane createDepartmentTable() {
-        String[] columns = {"Name", "HOD", "Degree", "No of Staff"};
-        Object[][] data = {
-                {"Applied Computing", "Kumar Sanga", "Engineering Technology", "15"},
-                {"Software Engineering", "Kumar Sanga", "Information Technology", "17"},
-                {"Computer Systems Engineering", "Kumar Sanga", "Computer Science", "12"}
-        };
+        // Updated Columns: "Degree" is removed, "ID" is added
+        String[] columns = {"ID", "Name", "HOD", "No of Staff"};
 
-        departmentTableModel = new DefaultTableModel(data, columns) {
+        departmentTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
@@ -256,10 +315,68 @@ public class DepartmentDashboardView extends JFrame {
             departmentTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
+        // Make ID column small
+        departmentTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+        departmentTable.getColumnModel().getColumn(1).setPreferredWidth(250);
+
         JScrollPane scrollPane = new JScrollPane(departmentTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(CLR_ACCENT, 1));
         scrollPane.getViewport().setBackground(Color.WHITE);
         return scrollPane;
+    }
+
+    // --- NAVIGATION & STYLING ---
+    private JPanel createTopNavBar() {
+        JPanel navPanel = new JPanel(new BorderLayout());
+        navPanel.setBackground(CLR_NAV_BAR);
+        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, CLR_ACCENT));
+        navPanel.setPreferredSize(new Dimension(getWidth(), 60));
+
+        JLabel lblWelcome = new JLabel("  Welcome, Admin");
+        lblWelcome.setFont(FONT_NAV);
+        lblWelcome.setForeground(CLR_HEADER_BG);
+        navPanel.add(lblWelcome, BorderLayout.WEST);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        buttonPanel.setBackground(CLR_NAV_BAR);
+
+        JButton btnStudents = createNavButton("Students");
+        JButton btnLecturers = createNavButton("Lecturers");
+        JButton btnDepartments = createNavButton("Departments");
+        JButton btnDegrees = createNavButton("Degrees");
+        JButton btnLogout = createNavButton("Logout");
+        btnLogout.setForeground(new Color(180, 50, 50));
+
+        btnLogout.addActionListener(e -> {
+            int choice = JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if(choice == JOptionPane.YES_OPTION) dispose();
+        });
+
+        // Navigation logic (Add your other page classes here)
+        btnDegrees.addActionListener(e -> {
+            // new DegreeDashboardView().setVisible(true);
+            // dispose();
+        });
+
+        buttonPanel.add(btnStudents);
+        buttonPanel.add(btnLecturers);
+        buttonPanel.add(btnDepartments);
+        buttonPanel.add(btnDegrees);
+        buttonPanel.add(btnLogout);
+
+        navPanel.add(buttonPanel, BorderLayout.EAST);
+        return navPanel;
+    }
+
+    private JButton createNavButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setFont(FONT_NAV);
+        btn.setForeground(CLR_HEADER_BG);
+        btn.setBackground(CLR_NAV_BAR);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 
     private JButton createActionButton(String text, boolean isPrimary) {
@@ -270,12 +387,11 @@ public class DepartmentDashboardView extends JFrame {
         if (isPrimary) {
             btn.setBackground(CLR_HEADER_BG);
             btn.setForeground(Color.WHITE);
-            btn.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
         } else {
             btn.setBackground(CLR_ACCENT);
             btn.setForeground(Color.WHITE);
-            btn.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
         }
+        btn.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
         return btn;
     }
 
@@ -308,7 +424,6 @@ public class DepartmentDashboardView extends JFrame {
         }
     }
 
-    // --- MAIN METHOD ---
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new DepartmentDashboardView().setVisible(true));
     }
