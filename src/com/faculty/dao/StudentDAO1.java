@@ -5,7 +5,7 @@ public class StudentDAO1 {
     // ==========================================
     // FETCH STUDENT DATA
     // ==========================================
-    public Student getStudentById(String id) {
+    public Student1 getStudentById(String id) {
         String sql = "SELECT * FROM students WHERE student_id = ?";
         try (Connection conn = dbc.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -14,7 +14,7 @@ public class StudentDAO1 {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                return new Student(
+                return new Student1(
                         rs.getString("student_id"),
                         rs.getString("fullname"),
                         rs.getString("email"),
@@ -32,7 +32,7 @@ public class StudentDAO1 {
     // ==========================================
     // UPDATE STUDENT DATA (The Fixed Method)
     // ==========================================
-    public boolean updateStudent(Student student) {
+    public boolean updateStudent(Student1 student) {
         // Query matches your structure: student_id, fullname, email, mobile_no, degree_id, user_id
         String sql = "UPDATE students SET fullname = ?, email = ?, mobile_no = ?, degree_id = ?, user_id = ? WHERE student_id = ?";
 
