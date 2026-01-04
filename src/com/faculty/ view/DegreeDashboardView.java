@@ -12,13 +12,20 @@ public class DegreeDashboardView extends JFrame {
     // Inside DegreeDashboardView class
     private DegreeDAO degreeDAO = new DegreeDAO();
     // --- COLOR PALETTE (Sage Green Theme) ---
-    private final Color CLR_BG = new Color(235, 233, 225);
-    private final Color CLR_HEADER_BG = new Color(70, 75, 60);  // Dark Olive
-    private final Color CLR_ACCENT = new Color(155, 150, 130);  // Sage
-    private final Color CLR_NAV_BAR = new Color(225, 223, 215);
-    private final Color CLR_SAVE_BTN = new Color(165, 82, 45);  // Terracotta
+    // Desert Nocturne Palette
+    // Nordic Moss Palette
+    // Steel & Ice Palette
+    // --- REFINED PREMIUM PALETTE ---
 
-    // Fonts
+    // Core Backgrounds
+    private final Color CLR_BG          = new Color(20, 24, 42);   // Deep midnight base
+    private final Color CLR_HEADER_BG   = new Color(30, 35, 60);   // Slightly lighter for depth
+    private final Color CLR_NAV_BAR     = new Color(15, 18, 32);   // Darkest shade for side/top nav
+    // Accents & Actions
+    private final Color CLR_ACCENT      = new Color(212, 175, 55);  // Metallic Gold
+    private final Color CLR_SAVE_BTN    = new Color(212, 175, 55);  // Matches accent for CTA consistency
+    private final Color CLR_WHITE       = new Color(245, 245, 245); // Off-white for readability
+
     private final Font FONT_TITLE = new Font("Serif", Font.ITALIC | Font.BOLD, 36);
     private final Font FONT_BTN = new Font("SansSerif", Font.BOLD, 12);
     private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 12);
@@ -56,7 +63,7 @@ public class DegreeDashboardView extends JFrame {
 
         JLabel lblWelcome = new JLabel("  Welcome, Admin");
         lblWelcome.setFont(FONT_NAV);
-        lblWelcome.setForeground(CLR_HEADER_BG);
+        lblWelcome.setForeground(CLR_WHITE);
         navPanel.add(lblWelcome, BorderLayout.WEST);
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         buttonPanel.setBackground(CLR_NAV_BAR);
@@ -67,11 +74,22 @@ public class DegreeDashboardView extends JFrame {
         JButton btnDepartments = createNavButton("Departments");
         JButton btnLogout = createNavButton("Logout");
         btnLogout.setForeground(new Color(180, 50, 50));
+
+        btnDegrees.addActionListener(e -> {
+            new DegreeDashboardView().setVisible(true); // Open Degrees page
+            this.dispose(); // Close current Department Dashboard
+        });
+        btnStudents.addActionListener(e -> {
+            new StudentDashboardView().setVisible(true); // Open Degrees page
+            this.dispose(); // Close current Department Dashboard
+        });
+        btnLecturers.addActionListener(e -> {
+            new LecturerDashboardView().setVisible(true); // Open Degrees page
+            this.dispose(); // Close current Department Dashboard
+        });
         btnDepartments.addActionListener(e -> {
-            // Logic to open Degrees JFrame would go here
-            new DepartmentDashboardView().setVisible(true);
-            this.dispose();
-            //JOptionPane.showMessageDialog(this, "Navigate to Degrees Page");
+            new DepartmentDashboardView().setVisible(true); // Open Degrees page
+            this.dispose(); // Close current Department Dashboard
         });
 
         btnLogout.addActionListener(e -> {
@@ -84,7 +102,7 @@ public class DegreeDashboardView extends JFrame {
         buttonPanel.add(btnLecturers);
         buttonPanel.add(btnDepartments);
         buttonPanel.add(btnDegrees);
-       
+
         buttonPanel.add(btnLogout);
 
         navPanel.add(buttonPanel, BorderLayout.EAST);
@@ -93,14 +111,14 @@ public class DegreeDashboardView extends JFrame {
     private JButton createNavButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(FONT_NAV);
-        btn.setForeground(CLR_HEADER_BG);
+        btn.setForeground(CLR_WHITE );
         btn.setBackground(CLR_NAV_BAR);
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setForeground(CLR_ACCENT.darker()); }
-            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setForeground(CLR_HEADER_BG); }
+            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setForeground(CLR_WHITE ); }
         });
         return btn;
     }
@@ -111,7 +129,7 @@ public class DegreeDashboardView extends JFrame {
 
         JLabel lblTitle = new JLabel("Degrees", SwingConstants.CENTER);
         lblTitle.setFont(FONT_TITLE);
-        lblTitle.setForeground(CLR_HEADER_BG);
+        lblTitle.setForeground(CLR_WHITE );
         lblTitle.setBorder(new EmptyBorder(0, 0, 20, 0));
         panel.add(lblTitle, BorderLayout.NORTH);
 
