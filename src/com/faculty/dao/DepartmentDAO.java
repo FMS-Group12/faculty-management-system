@@ -4,12 +4,11 @@ import javax.swing.JOptionPane;
 
 public class DepartmentDAO {
 
-    // Database Credentials
     private final String DB_URL = "jdbc:mysql://localhost:3306/faculty_management_system";
     private final String DB_USER = "root";
     private final String DB_PASS = "";
 
-    // --- 1. LOAD DATA (Read) ---
+    // --- READ ---
     public Vector<Vector<Object>> getAllDepartments() {
         Vector<Vector<Object>> data = new Vector<>();
         String query = "SELECT * FROM departments";
@@ -28,69 +27,51 @@ public class DepartmentDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "DB Connection Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "DB Error: " + e.getMessage());
         }
         return data;
     }
 
-    // --- 2. ADD DATA (Create) ---
+    // --- ADD ---
     public boolean addDepartment(String name, String hod, int staff) {
         String query = "INSERT INTO departments (name, hod, no_of_staff) VALUES (?, ?, ?)";
-
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement pstmt = conn.prepareStatement(query)) {
-
             pstmt.setString(1, name);
             pstmt.setString(2, hod);
             pstmt.setInt(3, staff);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0; // Returns true if successful
-
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error Adding Department: " + e.getMessage());
             return false;
         }
     }
 
-    // --- 3. EDIT DATA (Update) ---
+    // --- UPDATE ---
     public boolean updateDepartment(int id, String name, String hod, int staff) {
         String query = "UPDATE departments SET name=?, hod=?, no_of_staff=? WHERE department_id=?";
-
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement pstmt = conn.prepareStatement(query)) {
-
             pstmt.setString(1, name);
             pstmt.setString(2, hod);
             pstmt.setInt(3, staff);
             pstmt.setInt(4, id);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error Updating Department: " + e.getMessage());
             return false;
         }
     }
 
-    // --- 4. DELETE DATA (Delete) ---
+    // --- DELETE ---
     public boolean deleteDepartment(int id) {
         String query = "DELETE FROM departments WHERE department_id=?";
-
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement pstmt = conn.prepareStatement(query)) {
-
             pstmt.setInt(1, id);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error Deleting Department: " + e.getMessage());
             return false;
         }
     }
