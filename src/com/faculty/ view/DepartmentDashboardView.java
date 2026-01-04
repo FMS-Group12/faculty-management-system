@@ -61,7 +61,7 @@ public class DepartmentDashboardView extends JFrame {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(new EmptyBorder(10, 0, 40, 0));
-        JButton btnSave = createRoundedButton("REFRESH DATA", new Dimension(200, 40), CLR_ACCENT, 12);
+        JButton btnSave = createRoundedButton("Save Changes", new Dimension(200, 40), CLR_ACCENT, 12);
         btnSave.addActionListener(e -> refreshTableData());
         bottomPanel.add(btnSave);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
