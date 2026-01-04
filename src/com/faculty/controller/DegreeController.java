@@ -9,13 +9,10 @@ public class DegreeController {
         degreeDAO = new DegreeDAO();
     }
 
-    // ================== READ ==================
-    // Used by View to load table data
     public Vector<Vector<Object>> getAllDegreesForTable() {
         return degreeDAO.getAllDegrees();
     }
 
-    // ================== CREATE ==================
     public boolean addDegree(String degreeName, String departmentName, int numberOfStudents) {
 
         // Basic business validation
@@ -31,8 +28,7 @@ public class DegreeController {
 
         return degreeDAO.addDegree(degreeName, departmentName, numberOfStudents);
     }
-
-    // ================== UPDATE ==================
+    
     public boolean updateDegree(String oldDegreeName,
                                 String newDegreeName,
                                 String departmentName,
@@ -50,7 +46,6 @@ public class DegreeController {
         );
     }
 
-    // ================== DELETE ==================
     public boolean deleteDegree(String degreeName) {
         if (degreeName == null || degreeName.isEmpty()) {
             return false;
