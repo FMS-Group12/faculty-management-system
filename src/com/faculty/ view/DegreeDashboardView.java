@@ -90,7 +90,7 @@ public class DegreeDashboardView extends JFrame {
 
         btnLogout.addActionListener(e -> {
             if(JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                new SignUpView().setVisible(true);
+                new SignInView().setVisible(true);
                 this.dispose(); // Close Application or return to Login
             }
         });
