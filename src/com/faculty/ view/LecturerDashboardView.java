@@ -65,7 +65,7 @@ public class LecturerDashboardView extends JFrame {
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(new EmptyBorder(10, 0, 40, 0));
 
-        JButton btnSave = createRoundedButton("SAVE CHANGES", new Dimension(200, 40), CLR_ACCENT, 16);
+        JButton btnSave = createRoundedButton("SAVE CHANGES", new Dimension(200, 40), CLR_ACCENT, 12);
         btnSave.addActionListener(e -> {
             refreshTable();
             JOptionPane.showMessageDialog(this, "Data Synchronized Successfully!");
@@ -316,3 +316,4 @@ public class LecturerDashboardView extends JFrame {
         SwingUtilities.invokeLater(() -> new LecturerDashboardView().setVisible(true));
     }
 }
+
