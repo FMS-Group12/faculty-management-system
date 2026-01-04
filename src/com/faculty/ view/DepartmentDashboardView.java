@@ -147,7 +147,7 @@ public class DepartmentDashboardView extends JFrame {
         // --- NAVIGATION BUTTONS ---
         JButton btnStudents = createNavButton("Students");
         JButton btnLecturers = createNavButton("Lecturers");
-        JButton btnCourses = createNavButton("Courses"); // <--- NEW BUTTON
+        JButton btnCourses = createNavButton("Courses");
         JButton btnDepartments = createNavButton("Departments");
         JButton btnDegrees = createNavButton("Degrees");
         JButton btnLogout = createNavButton("Logout");
@@ -165,25 +165,30 @@ public class DepartmentDashboardView extends JFrame {
         });
 
         btnCourses.addActionListener(e -> {
-            new CourseDashboardView().setVisible(true); // <--- Opens Course Page
+            new CourseDashboardView().setVisible(true);
             dispose();
         });
 
-        btnDepartments.addActionListener(e -> refreshTableData()); // Already here, just refresh
+        btnDepartments.addActionListener(e -> refreshTableData());
 
         btnDegrees.addActionListener(e -> {
             new DegreeDashboardView().setVisible(true);
             dispose();
         });
 
+        // --- UPDATED LOGOUT LOGIC: GO TO SIGN IN VIEW ---
         btnLogout.addActionListener(e -> {
-            if(JOptionPane.showConfirmDialog(this,"Logout?")==0) dispose();
+            int choice = JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (choice == JOptionPane.YES_OPTION) {
+                new SignInView().setVisible(true); // <--- Opens your SignInView
+                dispose();
+            }
         });
 
         // Add to panel
         buttonPanel.add(btnStudents);
         buttonPanel.add(btnLecturers);
-        buttonPanel.add(btnCourses); // <--- Add to layout
+        buttonPanel.add(btnCourses);
         buttonPanel.add(btnDepartments);
         buttonPanel.add(btnDegrees);
         buttonPanel.add(btnLogout);
