@@ -12,10 +12,9 @@ import java.util.Vector;
 
 public class DepartmentDashboardView extends JFrame {
 
-    // --- CONTROLLER ---
+   
     private DepartmentController controller = new DepartmentController();
 
-    // --- MIDNIGHT GLASS PALETTE ---
     private final Color CLR_BG_START   = new Color(20, 24, 42);
     private final Color CLR_BG_END     = new Color(40, 45, 70);
     private final Color CLR_GLASS_BG   = new Color(255, 255, 255, 15);
@@ -25,7 +24,7 @@ public class DepartmentDashboardView extends JFrame {
     private final Color CLR_NAV_BAR    = new Color(15, 18, 32);
     private final Color CLR_LOGOUT     = new Color(255, 80, 80);
 
-    // --- FONTS ---
+ 
     private final Font FONT_TITLE  = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
     private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 16);
     private final Font FONT_CELL   = new Font("SansSerif", Font.PLAIN, 14);
@@ -59,7 +58,6 @@ public class DepartmentDashboardView extends JFrame {
         mainPanel.add(createTopNavBar(), BorderLayout.NORTH);
         mainPanel.add(createDepartmentsContent(), BorderLayout.CENTER);
 
-        // Save Button (Optional Footer)
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(new EmptyBorder(10, 0, 40, 0));
@@ -150,11 +148,11 @@ public class DepartmentDashboardView extends JFrame {
         JButton btnDegrees = createNavButton("Degrees");
         JButton btnLogout = createNavButton("Logout");
 
-        // Active Tab Styling
+       
         btnDepartments.setForeground(CLR_ACCENT);
         btnDepartments.setBorder(new MatteBorder(0, 0, 2, 0, CLR_ACCENT));
 
-        // Navigation
+       
         btnStudents.addActionListener(e -> { new StudentDashboardView().setVisible(true); dispose(); });
         btnLecturers.addActionListener(e -> { new LecturerDashboardView().setVisible(true); dispose(); });
         btnCourses.addActionListener(e -> { new CourseDashboardView().setVisible(true); dispose(); });
@@ -189,7 +187,7 @@ public class DepartmentDashboardView extends JFrame {
         lblTitle.setForeground(CLR_WHITE);
         panel.add(lblTitle, BorderLayout.NORTH);
 
-        // Glass Table Container
+       
         JPanel tableContainer = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
