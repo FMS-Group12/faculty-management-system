@@ -29,6 +29,7 @@ public class SignUpView extends JFrame {
         setUndecorated(true);
         setSize(550, 850);
         setLocationRelativeTo(null);
+        // Allows for transparent/rounded corners
         setBackground(new Color(0, 0, 0, 0));
 
         // --- MAIN BACKGROUND PANEL ---
@@ -39,7 +40,9 @@ public class SignUpView extends JFrame {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 GradientPaint gp = new GradientPaint(0, 0, CLR_BG_START, 0, getHeight(), CLR_BG_END);
                 g2d.setPaint(gp);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+                // If maximized, we don't need rounded corners
+                int arc = (getExtendedState() == JFrame.MAXIMIZED_BOTH) ? 0 : 40;
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
             }
         };
         setContentPane(mainPanel);
@@ -49,25 +52,45 @@ public class SignUpView extends JFrame {
         titleBar.setOpaque(false);
         titleBar.setPreferredSize(new Dimension(getWidth(), 60));
 
+        // Dragging Logic
         titleBar.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) { mouseX = e.getX(); mouseY = e.getY(); }
         });
         titleBar.addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
-                setLocation(e.getXOnScreen() - mouseX, e.getYOnScreen() - mouseY);
+                // Only allow dragging if not maximized
+                if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
+                    setLocation(e.getXOnScreen() - mouseX, e.getYOnScreen() - mouseY);
+                }
             }
         });
 
-        JPanel windowControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 15));
+        JPanel windowControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 10));
         windowControls.setOpaque(false);
 
+        // Minimize Button
         JButton btnMin = createControlBtn("—");
         btnMin.addActionListener(e -> setState(JFrame.ICONIFIED));
 
+        // Maximize/Restore Button
+        JButton btnMax = createControlBtn("⬜");
+        btnMax.addActionListener(e -> {
+            if (getExtendedState() == JFrame.MAXIMIZED_BOTH) {
+                setExtendedState(JFrame.NORMAL);
+                btnMax.setText("⬜");
+            } else {
+                setExtendedState(JFrame.MAXIMIZED_BOTH);
+                btnMax.setText("❐"); // Restore icon
+            }
+            mainPanel.repaint();
+        });
+
+        // Close Button
         JButton btnClose = createControlBtn("✕");
         btnClose.addActionListener(e -> System.exit(0));
 
         windowControls.add(btnMin);
+        windowControls.add(btnMax);
         windowControls.add(btnClose);
         titleBar.add(windowControls, BorderLayout.EAST);
         mainPanel.add(titleBar, BorderLayout.NORTH);
@@ -81,10 +104,8 @@ public class SignUpView extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // Shadow
                 g2.setColor(new Color(0,0,0,80));
                 g2.fillRoundRect(5, 5, getWidth()-10, getHeight()-10, 40, 40);
-                // Glass effect
                 g2.setColor(CLR_GLASS_BG);
                 g2.fillRoundRect(0, 0, getWidth()-10, getHeight()-10, 40, 40);
             }
@@ -97,7 +118,6 @@ public class SignUpView extends JFrame {
         contentPanel.setOpaque(false);
         contentPanel.setBorder(new EmptyBorder(30, 40, 30, 40));
 
-        // Content
         JLabel title = new JLabel("Create Account");
         title.setFont(new Font("Inter", Font.BOLD, 32));
         title.setForeground(CLR_WHITE);
@@ -142,9 +162,9 @@ public class SignUpView extends JFrame {
         contentPanel.add(btnLogin);
 
         // --- ASSEMBLY ---
-        customGlass.add(contentPanel, BorderLayout.CENTER); // Add content to glass
-        centerWrapper.add(customGlass);                    // Put glass in center wrapper
-        mainPanel.add(centerWrapper, BorderLayout.CENTER); // Put wrapper in main background
+        customGlass.add(contentPanel, BorderLayout.CENTER);
+        centerWrapper.add(customGlass);
+        mainPanel.add(centerWrapper, BorderLayout.CENTER);
     }
 
     private void handleSignUp() {
@@ -153,7 +173,7 @@ public class SignUpView extends JFrame {
         String confirm = new String(txtConfirm.getPassword());
 
         if (user.isEmpty() || pass.isEmpty() || selectedRole.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields and select a role.");
+            JOptionPane.showMessageDialog(this, "Please fill all fields.");
             return;
         }
         if (!pass.equals(confirm)) {
@@ -271,6 +291,7 @@ public class SignUpView extends JFrame {
         b.setContentAreaFilled(false);
         b.setBorderPainted(false);
         b.setFocusPainted(false);
+        b.setFont(new Font("SansSerif", Font.PLAIN, 18));
         b.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return b;
     }
@@ -291,7 +312,4 @@ public class SignUpView extends JFrame {
         SwingUtilities.invokeLater(() -> new SignUpView().setVisible(true));
     }
 }
-
-// --- Placeholder Classes to ensure the code compiles ---
-
 
