@@ -7,24 +7,24 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 
 public class LecturerDashboardView extends JFrame {
 
-    // --- MIDNIGHT GLASS PALETTE (Matching SignUpView) ---
+    // --- MIDNIGHT GLASS PALETTE ---
     private final Color CLR_BG_START   = new Color(20, 24, 42);
     private final Color CLR_BG_END     = new Color(40, 45, 70);
     private final Color CLR_GLASS_BG   = new Color(255, 255, 255, 15);
-    private final Color CLR_ACCENT     = new Color(212, 175, 55); // Gold
+    private final Color CLR_ACCENT     = new Color(212, 175, 55);
     private final Color CLR_WHITE      = new Color(245, 245, 245);
     private final Color CLR_FIELD_BG   = new Color(45, 50, 75);
     private final Color CLR_NAV_BAR    = new Color(15, 18, 32);
-    private final Color CLR_LOGOUT     = new Color(255, 80, 80);
+    private final Color CLR_LOGOUT     = new Color(255, 80, 80); // Red color for logout
 
-    // Fonts
     private final Font FONT_TITLE  = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
-    private final Font FONT_BTN    = new Font("SansSerif", Font.BOLD, 11);
-    private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 12);
+    private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 16);
     private final Font FONT_CELL   = new Font("SansSerif", Font.PLAIN, 14);
     private final Font FONT_NAV    = new Font("SansSerif", Font.BOLD, 18);
 
@@ -42,12 +42,11 @@ public class LecturerDashboardView extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Faculty Management System ");
+        setTitle("Faculty Management System - Midnight Edition");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 800);
         setLocationRelativeTo(null);
 
-        // Main Gradient Background
         JPanel mainPanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -62,7 +61,6 @@ public class LecturerDashboardView extends JFrame {
         mainPanel.add(createTopNavBar(), BorderLayout.NORTH);
         mainPanel.add(createLecturersContent(), BorderLayout.CENTER);
 
-        // Bottom Save Area
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(new EmptyBorder(10, 0, 40, 0));
@@ -91,6 +89,7 @@ public class LecturerDashboardView extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 25, 22));
         buttonPanel.setOpaque(false);
 
+        // Buttons
         JButton btnStudents = createNavButton("Students");
         JButton btnLecturers = createNavButton("Lecturers");
         JButton btnCourses = createNavButton("Courses");
@@ -98,15 +97,17 @@ public class LecturerDashboardView extends JFrame {
         JButton btnDegrees = createNavButton("Degrees");
         JButton btnLogout = createNavButton("Logout");
 
+        // Set Active Page Styling
         btnLecturers.setForeground(CLR_ACCENT);
         btnLecturers.setBorder(new MatteBorder(0, 0, 2, 0, CLR_ACCENT));
 
+        // NAVIGATION ACTIONS
         btnStudents.addActionListener(e -> { new StudentDashboardView().setVisible(true); this.dispose(); });
+        btnLecturers.addActionListener(e -> refreshTable());
         btnCourses.addActionListener(e -> { new CourseDashboardView().setVisible(true); this.dispose(); });
         btnDepartments.addActionListener(e -> { new DepartmentDashboardView().setVisible(true); this.dispose(); });
         btnDegrees.addActionListener(e -> { new DegreeDashboardView().setVisible(true); this.dispose(); });
 
-        btnLogout.setForeground(CLR_LOGOUT);
         btnLogout.addActionListener(e -> {
             if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", 0) == 0) {
                 new SignInView().setVisible(true);
@@ -130,7 +131,6 @@ public class LecturerDashboardView extends JFrame {
         panel.setOpaque(false);
         panel.setBorder(new EmptyBorder(60, 50, 30, 50));
 
-        // UPDATED: Title to "Lecturers"
         JLabel lblTitle = new JLabel("Lecturers", SwingConstants.CENTER);
         lblTitle.setFont(FONT_TITLE);
         lblTitle.setForeground(CLR_WHITE);
@@ -182,12 +182,11 @@ public class LecturerDashboardView extends JFrame {
         lecturerTable.setSelectionBackground(new Color(212, 175, 55, 60));
         lecturerTable.setSelectionForeground(CLR_ACCENT);
         lecturerTable.setShowGrid(false);
+        lecturerTable.setRowSelectionAllowed(true);
 
-        // --- UPDATED: CENTER CONTENT RENDERING ---
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        centerRenderer.setOpaque(false);
-
+        centerRenderer.setOpaque(true);
         for (int i = 0; i < lecturerTable.getColumnCount(); i++) {
             lecturerTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
@@ -197,8 +196,6 @@ public class LecturerDashboardView extends JFrame {
         header.setForeground(CLR_ACCENT);
         header.setFont(FONT_HEADER);
         header.setPreferredSize(new Dimension(0, 45));
-
-        // Center the Header Text
         ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
         JScrollPane scroll = new JScrollPane(lecturerTable);
@@ -209,50 +206,37 @@ public class LecturerDashboardView extends JFrame {
     }
 
     private void showAddLecturerDialog() {
-        JTextField nameF = createStyledField();
-        JTextField courF = createStyledField();
-        JTextField emailF = createStyledField();
-        JTextField mobF = createStyledField();
+        JTextField nameF = createStyledField(); JTextField courF = createStyledField();
+        JTextField emailF = createStyledField(); JTextField mobF = createStyledField();
         java.util.Map<String, Integer> deptMap = lectureDAO.getDepartmentMap();
         JComboBox<String> deptCombo = new JComboBox<>(deptMap.keySet().toArray(new String[0]));
-        deptCombo.setBackground(CLR_FIELD_BG);
-        deptCombo.setForeground(CLR_WHITE);
+        deptCombo.setBackground(CLR_FIELD_BG); deptCombo.setForeground(CLR_WHITE);
 
         Object[] fields = { "Full Name:", nameF, "Department:", deptCombo, "Courses:", courF, "Email:", emailF, "Mobile:", mobF };
-        if (JOptionPane.showConfirmDialog(this, fields, "New Lecturer", 0) == 0) {
+        if (JOptionPane.showConfirmDialog(this, fields, "Add New Lecturer", 2) == 0) {
             String deptIdStr = String.valueOf(deptMap.get((String) deptCombo.getSelectedItem()));
-            if (lectureDAO.addLecturer(nameF.getText(), deptIdStr, courF.getText(), emailF.getText(), mobF.getText())) {
-                refreshTable();
-            }
+            if (lectureDAO.addLecturer(nameF.getText(), deptIdStr, courF.getText(), emailF.getText(), mobF.getText())) { refreshTable(); }
         }
     }
 
     private void showEditLecturerDialog() {
         int row = lecturerTable.getSelectedRow();
         if (row == -1) { JOptionPane.showMessageDialog(this, "Select a lecturer to edit."); return; }
-
         String originalEmail = (String) lecturerTableModel.getValueAt(row, 3);
-        JTextField nameF = createStyledField();
-        nameF.setText((String) lecturerTableModel.getValueAt(row, 0));
-        JTextField courF = createStyledField();
-        courF.setText((String) lecturerTableModel.getValueAt(row, 2));
-        JTextField emailF = createStyledField();
-        emailF.setText(originalEmail);
-        JTextField mobF = createStyledField();
-        mobF.setText((String) lecturerTableModel.getValueAt(row, 4));
+        JTextField nameF = createStyledField(); nameF.setText((String) lecturerTableModel.getValueAt(row, 0));
+        JTextField courF = createStyledField(); courF.setText((String) lecturerTableModel.getValueAt(row, 2));
+        JTextField emailF = createStyledField(); emailF.setText(originalEmail);
+        JTextField mobF = createStyledField(); mobF.setText((String) lecturerTableModel.getValueAt(row, 4));
 
         java.util.Map<String, Integer> deptMap = lectureDAO.getDepartmentMap();
         JComboBox<String> deptCombo = new JComboBox<>(deptMap.keySet().toArray(new String[0]));
         deptCombo.setSelectedItem(lecturerTableModel.getValueAt(row, 1));
-        deptCombo.setBackground(CLR_FIELD_BG);
-        deptCombo.setForeground(CLR_WHITE);
+        deptCombo.setBackground(CLR_FIELD_BG); deptCombo.setForeground(CLR_WHITE);
 
         Object[] fields = { "Full Name:", nameF, "Department:", deptCombo, "Courses:", courF, "Email:", emailF, "Mobile:", mobF };
-        if (JOptionPane.showConfirmDialog(this, fields, "Edit Lecturer", 0) == 0) {
+        if (JOptionPane.showConfirmDialog(this, fields, "Edit Lecturer", 2) == 0) {
             String deptIdStr = String.valueOf(deptMap.get((String) deptCombo.getSelectedItem()));
-            if (lectureDAO.updateLecturer(nameF.getText(), deptIdStr, courF.getText(), emailF.getText(), mobF.getText(), originalEmail)) {
-                refreshTable();
-            }
+            if (lectureDAO.updateLecturer(nameF.getText(), deptIdStr, courF.getText(), emailF.getText(), mobF.getText(), originalEmail)) { refreshTable(); }
         }
     }
 
@@ -263,26 +247,49 @@ public class LecturerDashboardView extends JFrame {
             if (JOptionPane.showConfirmDialog(this, "Delete " + email + "?", "Confirm", 0) == 0) {
                 if (lectureDAO.deleteLecturer(email)) refreshTable();
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Select a row to delete.");
-        }
+        } else { JOptionPane.showMessageDialog(this, "Select a row to delete."); }
     }
 
+    // --- UPDATED NAV FACTORY ---
     private JButton createNavButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("SansSerif", Font.BOLD, 14));
-        btn.setForeground(CLR_WHITE);
+
+        // CHECK FOR LOGOUT TO SET RED COLOR
+        if (text.equals("Logout")) {
+            btn.setForeground(CLR_LOGOUT);
+        } else {
+            btn.setForeground(CLR_WHITE);
+        }
+
         btn.setContentAreaFilled(false);
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btn.setForeground(CLR_ACCENT);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // Restore Red if Logout, Gold if Lecturers, White otherwise
+                if (text.equals("Logout")) {
+                    btn.setForeground(CLR_LOGOUT);
+                } else if (text.equals("Lecturers")) {
+                    btn.setForeground(CLR_ACCENT);
+                } else {
+                    btn.setForeground(CLR_WHITE);
+                }
+            }
+        });
         return btn;
     }
 
     private JButton createRoundedButton(String text, Dimension size, Color bg, int fontSize) {
         JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
+            @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(getBackground());
@@ -294,25 +301,18 @@ public class LecturerDashboardView extends JFrame {
                 g2.dispose();
             }
         };
-        btn.setPreferredSize(size);
-        btn.setBackground(bg);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(size); btn.setBackground(bg); btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false); btn.setFocusPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
     private JTextField createStyledField() {
-        JTextField field = new JTextField();
-        field.setBackground(CLR_FIELD_BG);
-        field.setForeground(CLR_WHITE);
-        field.setCaretColor(CLR_WHITE);
+        JTextField field = new JTextField(); field.setBackground(CLR_FIELD_BG);
+        field.setForeground(CLR_WHITE); field.setCaretColor(CLR_WHITE);
         return field;
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LecturerDashboardView().setVisible(true));
     }
-
 }
