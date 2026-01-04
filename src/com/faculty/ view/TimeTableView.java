@@ -74,12 +74,12 @@ public class TimeTableView extends JFrame {
         btnLogout.setForeground(new Color(180, 50, 50));
 
         // --- NAVIGATION LOGIC ---
-        
+
         // 1. Go to Profile
-        btnProfile.addActionListener(e -> {
-            new StudentProfileView().setVisible(true); 
-            dispose(); 
-        });
+//        btnProfile.addActionListener(e -> {
+//            new StudentProfileView().setVisible(true);
+//            dispose();
+//        });
 
         // 2. Stay on Timetable (Already here)
         btnTimetable.addActionListener(e -> {
@@ -87,15 +87,19 @@ public class TimeTableView extends JFrame {
         });
 
         // 3. Go to Courses
-        btnCourses.addActionListener(e -> {
-            new StudentCoursesView().setVisible(true); 
-            dispose(); 
-        });
+//        btnCourses.addActionListener(e -> {
+//            new StudentCoursesView().setVisible(true);
+//            dispose();
+//        });
 
         // 4. Logout
         btnLogout.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION);
-            if(choice == JOptionPane.YES_OPTION) dispose();
+            if(choice == JOptionPane.YES_OPTION)
+            {
+                new SignInView().setVisible(true);
+                dispose();
+            }
         });
 
         buttonPanel.add(btnProfile);
@@ -150,7 +154,7 @@ public class TimeTableView extends JFrame {
         panel.add(Box.createVerticalStrut(5));
         panel.add(lblSubtitle);
         panel.add(Box.createVerticalStrut(30));
-        panel.add(createTable()); 
+        panel.add(createTable());
 
         return panel;
     }
@@ -256,35 +260,5 @@ public class TimeTableView extends JFrame {
         SwingUtilities.invokeLater(() -> {
             new TimeTableView("Kumar").setVisible(true);
         });
-    }
-}
-
-// =========================================================
-// PLACEHOLDER CLASSES (These ensure the buttons work now)
-// =========================================================
-
-class StudentProfileView extends JFrame {
-    public StudentProfileView() {
-        setTitle("Student Profile");
-        setSize(800, 600);
-        setLocationRelativeTo(null);
-        add(new JLabel("Profile Page Placeholder", SwingConstants.CENTER));
-        
-        JButton btnBack = new JButton("Back to Timetable");
-        btnBack.addActionListener(e -> { new TimeTableView("Student").setVisible(true); dispose(); });
-        add(btnBack, BorderLayout.SOUTH);
-    }
-}
-
-class StudentCoursesView extends JFrame {
-    public StudentCoursesView() {
-        setTitle("Student Courses");
-        setSize(800, 600);
-        setLocationRelativeTo(null);
-        add(new JLabel("Course Page Placeholder", SwingConstants.CENTER));
-        
-        JButton btnBack = new JButton("Back to Timetable");
-        btnBack.addActionListener(e -> { new TimeTableView("Student").setVisible(true); dispose(); });
-        add(btnBack, BorderLayout.SOUTH);
     }
 }
