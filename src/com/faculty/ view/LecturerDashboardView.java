@@ -142,37 +142,51 @@ public class LecturerDashboardView extends JFrame {
         panel.add(centerContainer, BorderLayout.CENTER);
         return panel;
     }
-
+    // Inside LecturerDashboardView.java
     private void showAddLecturerDialog() {
         JTextField nameF = new JTextField();
-        JTextField deptIdF = new JTextField(); // Input the ID (e.g., 1, 2, or 3)
         JTextField courF = new JTextField();
         JTextField emailF = new JTextField();
         JTextField mobF = new JTextField();
 
+        // Fetch departments from database
+        java.util.Map<String, Integer> deptMap = lectureDAO.getDepartmentMap();
+
+        // Handle case where database might be empty to avoid NullPointerException
+        if (deptMap.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No departments found in database!");
+            return;
+        }
+
+        JComboBox<String> deptCombo = new JComboBox<>(deptMap.keySet().toArray(new String[0]));
+
         Object[] fields = {
                 "Full Name:", nameF,
-                "Department:", deptIdF, // User enters the ID here
+                "Department:", deptCombo,
                 "Courses:", courF,
                 "Email:", emailF,
                 "Mobile No:", mobF
         };
 
         if (JOptionPane.showConfirmDialog(null, fields, "Add New Lecturer", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            // Send data to DAO
+            // Extract the ID from the map using the selected name
+            String selectedDeptName = (String) deptCombo.getSelectedItem();
+            int id = deptMap.get(selectedDeptName);
+            String deptIdStr = String.valueOf(id);
+
             boolean success = lectureDAO.addLecturer(
                     nameF.getText(),
-                    deptIdF.getText(),
+                    deptIdStr, // Now passing "1" instead of "Applied Computing"
                     courF.getText(),
                     emailF.getText(),
                     mobF.getText()
             );
 
             if (success) {
-                refreshTable(); // The Join in the DAO will now show the Name for this ID
+                refreshTable();
                 JOptionPane.showMessageDialog(this, "Lecturer added successfully!");
             } else {
-                JOptionPane.showMessageDialog(this, "Error: Check if Department ID exists.");
+                JOptionPane.showMessageDialog(this, "Error: Check if Department and User exist.");
             }
         }
     }
@@ -288,6 +302,4 @@ public class LecturerDashboardView extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LecturerDashboardView().setVisible(true));
     }
-
 }
-
