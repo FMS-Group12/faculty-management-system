@@ -5,23 +5,31 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
+
 
 public class CourseDashboardView extends JFrame {
 
-    private final Color CLR_BG = new Color(235, 233, 225);
-    private final Color CLR_HEADER_BG = new Color(70, 75, 60);
-    private final Color CLR_ACCENT = new Color(155, 150, 130);
-    private final Color CLR_NAV_BAR = new Color(225, 223, 215);
-
-    private final Font FONT_TITLE = new Font("Serif", Font.ITALIC | Font.BOLD, 36);
-    private final Font FONT_BTN = new Font("SansSerif", Font.BOLD, 12);
-    private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 12);
-    private final Font FONT_CELL = new Font("SansSerif", Font.PLAIN, 14);
-    private final Font FONT_NAV = new Font("SansSerif", Font.BOLD, 13);
-
-    private JTable courseTable;
-    private DefaultTableModel courseTableModel;
     private CourseController courseController = new CourseController();
+
+    private final Color CLR_BG_START   = new Color(20, 24, 42);
+    private final Color CLR_BG_END     = new Color(40, 45, 70);
+    private final Color CLR_GLASS_BG   = new Color(255, 255, 255, 15);
+    private final Color CLR_ACCENT     = new Color(212, 175, 55);
+    private final Color CLR_WHITE      = new Color(245, 245, 245);
+    private final Color CLR_FIELD_BG   = new Color(45, 50, 75);
+    private final Color CLR_NAV_BAR    = new Color(15, 18, 32);
+    private final Color CLR_LOGOUT     = new Color(255, 80, 80);
+
+    private final Font FONT_TITLE  = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
+    private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 16);
+    private final Font FONT_CELL   = new Font("SansSerif", Font.PLAIN, 14);
+    private final Font FONT_NAV    = new Font("SansSerif", Font.BOLD, 18);
+
+    private DefaultTableModel courseTableModel;
+    private JTable courseTable;
 
     public CourseDashboardView() {
         initializeUI();
@@ -29,119 +37,129 @@ public class CourseDashboardView extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Faculty Management System - Courses");
-        setSize(1000, 800);
-        setLocationRelativeTo(null);
+        setTitle("Faculty Management System - Courses Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1000, 850);
+        setLocationRelativeTo(null);
 
-        JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(CLR_BG);
-        setContentPane(root);
+        JPanel mainPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(0, 0, CLR_BG_START, 0, getHeight(), CLR_BG_END);
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        setContentPane(mainPanel);
 
-        root.add(createTopNavBar(), BorderLayout.NORTH);
-        root.add(createCourseContent(), BorderLayout.CENTER);
+        mainPanel.add(createTopNavBar(), BorderLayout.NORTH);
+        mainPanel.add(createCourseContent(), BorderLayout.CENTER);
 
-        // ADDED: Bottom panel for the Save Changes button
-        root.add(createBottomPanel(), BorderLayout.SOUTH);
-    }
-
-    private JPanel createTopNavBar() {
-        JPanel navPanel = new JPanel(new BorderLayout());
-        navPanel.setBackground(CLR_NAV_BAR);
-        navPanel.setPreferredSize(new Dimension(getWidth(), 55));
-        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, CLR_ACCENT));
-
-        JLabel lblWelcome = new JLabel("  Welcome, Admin");
-        lblWelcome.setFont(FONT_NAV);
-        lblWelcome.setForeground(CLR_HEADER_BG);
-        navPanel.add(lblWelcome, BorderLayout.WEST);
-
-        JPanel menuPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 25, 15));
-        menuPanel.setBackground(CLR_NAV_BAR);
-        menuPanel.add(createNavLink("Students"));
-        menuPanel.add(createNavLink("Lecturers"));
-        menuPanel.add(createNavLink("Departments"));
-        menuPanel.add(createNavLink("Degrees"));
-
-        JButton btnLogout = createNavLink("Logout");
-        btnLogout.setForeground(new Color(180, 50, 50));
-        btnLogout.addActionListener(e -> dispose());
-        menuPanel.add(btnLogout);
-
-        navPanel.add(menuPanel, BorderLayout.EAST);
-        return navPanel;
-    }
-
-    private JButton createNavLink(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(FONT_NAV);
-        btn.setForeground(CLR_HEADER_BG);
-        btn.setBorderPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
-
-    private JPanel createCourseContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(CLR_BG);
-        panel.setBorder(new EmptyBorder(30, 50, 10, 50)); // Adjusted bottom margin
-
-        JLabel title = new JLabel("Courses", SwingConstants.CENTER);
-        title.setFont(FONT_TITLE);
-        title.setForeground(CLR_HEADER_BG);
-        panel.add(title, BorderLayout.NORTH);
-
-        JPanel center = new JPanel(new BorderLayout());
-        center.setBackground(CLR_BG);
-
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        controls.setBackground(CLR_BG);
-
-        JButton btnAdd = createButton("Add", true);
-        JButton btnEdit = createButton("Edit", false);
-        JButton btnDelete = createButton("Delete", false);
-
-        btnAdd.addActionListener(e -> addCourse());
-        btnEdit.addActionListener(e -> editCourse());
-        btnDelete.addActionListener(e -> deleteCourse());
-
-        controls.add(btnAdd);
-        controls.add(btnEdit);
-        controls.add(btnDelete);
-
-        center.add(controls, BorderLayout.NORTH);
-        center.add(createCourseTable(), BorderLayout.CENTER);
-
-        panel.add(center, BorderLayout.CENTER);
-        return panel;
-    }
-
-    // NEW: Bottom Panel Method
-    private JPanel createBottomPanel() {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        bottomPanel.setBackground(CLR_BG);
-        bottomPanel.setBorder(new EmptyBorder(10, 0, 30, 0));
+        bottomPanel.setOpaque(false);
+        bottomPanel.setBorder(new EmptyBorder(10, 0, 40, 0));
 
-        JButton btnSaveAll = new JButton("SAVE CHANGES");
-        btnSaveAll.setFont(new Font("SansSerif", Font.BOLD, 14));
-        btnSaveAll.setBackground(new Color(60, 100, 60)); // Success Green
-        btnSaveAll.setForeground(Color.WHITE);
-        btnSaveAll.setPreferredSize(new Dimension(200, 45));
-        btnSaveAll.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // This button acts as a global "Finish Editing" or triggers the edit for selected row
-        btnSaveAll.addActionListener(e -> {
+        JButton btnSave = createRoundedButton("SAVE CHANGES", new Dimension(200, 45), CLR_ACCENT, 12);
+        btnSave.addActionListener(e -> {
             int row = courseTable.getSelectedRow();
             if (row != -1) {
-                editCourse();
+                showEditCourseDialog();
             } else {
                 JOptionPane.showMessageDialog(this, "Select a course record to update and save.");
             }
         });
 
-        bottomPanel.add(btnSaveAll);
-        return bottomPanel;
+        bottomPanel.add(btnSave);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private JPanel createTopNavBar() {
+        JPanel navPanel = new JPanel(new BorderLayout());
+        navPanel.setBackground(CLR_NAV_BAR);
+        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, new Color(255, 255, 255, 30)));
+        navPanel.setPreferredSize(new Dimension(getWidth(), 70));
+
+        JLabel lblWelcome = new JLabel("  Welcome, Admin");
+        lblWelcome.setFont(FONT_NAV);
+        lblWelcome.setForeground(CLR_ACCENT);
+        navPanel.add(lblWelcome, BorderLayout.WEST);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 25, 22));
+        buttonPanel.setOpaque(false);
+
+        JButton btnStudents = createNavButton("Students");
+        JButton btnLecturers = createNavButton("Lecturers");
+        JButton btnCourses = createNavButton("Courses");
+        JButton btnDegrees = createNavButton("Degrees");
+        JButton btnDepartments = createNavButton("Departments");
+        JButton btnLogout = createNavButton("Logout");
+
+        btnCourses.setForeground(CLR_WHITE);
+        btnCourses.setBorder(new MatteBorder(0, 0, 2, 0, CLR_ACCENT));
+
+        btnLecturers.addActionListener(e -> { new LecturerDashboardView().setVisible(true); this.dispose(); });
+        btnStudents.addActionListener(e -> { new StudentDashboardView().setVisible(true); this.dispose(); });
+        btnDepartments.addActionListener(e -> { new DepartmentDashboardView().setVisible(true); this.dispose(); });
+        btnDegrees.addActionListener(e -> { new DegreeDashboardView().setVisible(true); this.dispose(); });
+
+        btnLogout.addActionListener(e -> {
+            if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", 0) == 0) {
+                new SignInView().setVisible(true);
+                this.dispose();
+            }
+        });
+
+        buttonPanel.add(btnStudents);
+        buttonPanel.add(btnLecturers);
+        buttonPanel.add(btnCourses);
+        buttonPanel.add(btnDepartments);
+        buttonPanel.add(btnDegrees);
+        buttonPanel.add(btnLogout);
+
+        navPanel.add(buttonPanel, BorderLayout.EAST);
+        return navPanel;
+    }
+
+    private JPanel createCourseContent() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(40, 50, 20, 50));
+
+        JLabel lblTitle = new JLabel("Course Management", SwingConstants.CENTER);
+        lblTitle.setFont(FONT_TITLE);
+        lblTitle.setForeground(CLR_WHITE);
+        panel.add(lblTitle, BorderLayout.NORTH);
+
+        JPanel tableContainer = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(CLR_GLASS_BG);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+            }
+        };
+        tableContainer.setOpaque(false);
+        tableContainer.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        controls.setOpaque(false);
+
+        JButton btnAdd = createRoundedButton("Add New", new Dimension(100, 35), CLR_ACCENT, 11);
+        JButton btnEdit = createRoundedButton("Edit", new Dimension(100, 35), CLR_ACCENT, 11);
+        JButton btnDelete = createRoundedButton("Delete", new Dimension(100, 35), CLR_ACCENT, 11);
+
+        btnAdd.addActionListener(e -> showAddCourseDialog());
+        btnEdit.addActionListener(e -> showEditCourseDialog());
+        btnDelete.addActionListener(e -> deleteCourse());
+
+        controls.add(btnAdd); controls.add(btnEdit); controls.add(btnDelete);
+        tableContainer.add(controls, BorderLayout.NORTH);
+        tableContainer.add(createCourseTable(), BorderLayout.CENTER);
+
+        panel.add(tableContainer, BorderLayout.CENTER);
+        return panel;
     }
 
     private JScrollPane createCourseTable() {
@@ -149,18 +167,35 @@ public class CourseDashboardView extends JFrame {
         courseTableModel = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
+
         courseTable = new JTable(courseTableModel);
         courseTable.setRowHeight(45);
         courseTable.setFont(FONT_CELL);
-        courseTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        courseTable.setForeground(CLR_WHITE);
+        courseTable.setBackground(new Color(0,0,0,0));
+        courseTable.setOpaque(false);
+        courseTable.setSelectionBackground(new Color(212, 175, 55, 60));
+        courseTable.setSelectionForeground(CLR_ACCENT);
+        courseTable.setShowGrid(false);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        centerRenderer.setOpaque(false);
         for (int i = 0; i < courseTable.getColumnCount(); i++) {
             courseTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
-        return new JScrollPane(courseTable);
+        JTableHeader header = courseTable.getTableHeader();
+        header.setBackground(new Color(255, 255, 255, 10));
+        header.setForeground(CLR_ACCENT);
+        header.setFont(FONT_HEADER);
+        header.setPreferredSize(new Dimension(0, 45));
+
+        JScrollPane scroll = new JScrollPane(courseTable);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        return scroll;
     }
 
     private void loadCoursesFromDatabase() {
@@ -170,92 +205,113 @@ public class CourseDashboardView extends JFrame {
         }
     }
 
-    private void addCourse() {
-        JTextField code = new JTextField();
-        JTextField name = new JTextField();
-        JTextField lecturer = new JTextField();
-        JTextField credits = new JTextField();
+    private void showAddCourseDialog() {
+        JTextField codeF = createStyledField();
+        JTextField nameF = createStyledField();
+        JTextField lecF = createStyledField();
+        JTextField credF = createStyledField();
 
-        Object[] msg = {"Code:", code, "Name:", name, "Lecturer:", lecturer, "Credits:", credits};
+        Object[] fields = {
+                "Course Code:", codeF,
+                "Course Name:", nameF,
+                "Lecturer:", lecF,
+                "Credits:", credF
+        };
 
-        if (JOptionPane.showConfirmDialog(this, msg, "Add Course", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+        if (JOptionPane.showConfirmDialog(this, fields, "Add New Course", 2) == 0) {
             try {
-                if (courseController.addCourse(code.getText(), name.getText(), Integer.parseInt(credits.getText()), lecturer.getText())) {
+                if (courseController.addCourse(codeF.getText(), nameF.getText(), Integer.parseInt(credF.getText()), lecF.getText())) {
                     loadCoursesFromDatabase();
                 }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error adding course.");
+                JOptionPane.showMessageDialog(this, "Input Error: Check credits number.");
             }
         }
     }
 
-    private void editCourse() {
+    private void showEditCourseDialog() {
         int row = courseTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a row from the table first!");
+            JOptionPane.showMessageDialog(this, "Select a course to edit.");
             return;
         }
 
         String oldCode = courseTableModel.getValueAt(row, 0).toString();
-        String currentName = courseTableModel.getValueAt(row, 1).toString();
-        String currentLec = courseTableModel.getValueAt(row, 2).toString();
-        String currentCredits = courseTableModel.getValueAt(row, 3).toString();
+        JTextField codeF = createStyledField(); codeF.setText(oldCode);
+        JTextField nameF = createStyledField(); nameF.setText(courseTableModel.getValueAt(row, 1).toString());
+        JTextField lecF = createStyledField(); lecF.setText(courseTableModel.getValueAt(row, 2).toString());
+        JTextField credF = createStyledField(); credF.setText(courseTableModel.getValueAt(row, 3).toString());
 
-        JTextField codeField = new JTextField(oldCode);
-        JTextField nameField = new JTextField(currentName);
-        JTextField lecturerField = new JTextField(currentLec);
-        JTextField creditsField = new JTextField(currentCredits);
+        Object[] fields = { "Course Code:", codeF, "Course Name:", nameF, "Lecturer:", lecF, "Credits:", credF };
 
-        Object[] msg = {
-                "Course Code:", codeField,
-                "Course Name:", nameField,
-                "Lecturer Name:", lecturerField,
-                "Credits:", creditsField
-        };
-
-        int result = JOptionPane.showConfirmDialog(this, msg, "Edit Course Details", JOptionPane.OK_CANCEL_OPTION);
-
-        if (result == JOptionPane.OK_OPTION) {
-            try {
-                boolean success = courseController.updateCourse(
-                        oldCode,
-                        codeField.getText(),
-                        nameField.getText(),
-                        lecturerField.getText(),
-                        Integer.parseInt(creditsField.getText())
-                );
-
-                if (success) {
-                    loadCoursesFromDatabase();
-                    JOptionPane.showMessageDialog(this, "Updated Successfully!");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Update failed in Database.");
-                }
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Credits must be a number!");
+        if (JOptionPane.showConfirmDialog(this, fields, "Edit Course", 2) == 0) {
+            if (courseController.updateCourse(oldCode, codeF.getText(), nameF.getText(), lecF.getText(), Integer.parseInt(credF.getText()))) {
+                loadCoursesFromDatabase();
             }
         }
     }
 
     private void deleteCourse() {
         int row = courseTable.getSelectedRow();
-        if (row != -1 && JOptionPane.showConfirmDialog(this, "Delete selected course?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            if (courseController.deleteCourse(courseTableModel.getValueAt(row, 0).toString())) {
-                loadCoursesFromDatabase();
+        if (row != -1) {
+            String code = courseTableModel.getValueAt(row, 0).toString();
+            if (JOptionPane.showConfirmDialog(this, "Delete " + code + "?", "Confirm", 0) == 0) {
+                if (courseController.deleteCourse(code)) loadCoursesFromDatabase();
             }
-        } else if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Select a row first!");
         }
     }
 
-    private JButton createButton(String text, boolean primary) {
+    private JButton createNavButton(String text) {
         JButton btn = new JButton(text);
-        btn.setFont(FONT_BTN);
-        btn.setBackground(primary ? CLR_HEADER_BG : CLR_ACCENT);
-        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btn.setForeground(text.equals("Logout") ? CLR_LOGOUT : CLR_WHITE);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btn.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { btn.setForeground(CLR_ACCENT); }
+            @Override public void mouseExited(MouseEvent e) {
+                if (text.equals("Courses")) btn.setForeground(CLR_WHITE);
+                else btn.setForeground(text.equals("Logout") ? CLR_LOGOUT : CLR_WHITE);
+            }
+        });
+        return btn;
+    }
+
+    private JButton createRoundedButton(String text, Dimension size, Color bg, int fontSize) {
+        JButton btn = new JButton(text) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 15, 15));
+                g2.setColor(getBackground() == CLR_ACCENT ? CLR_BG_START : CLR_WHITE);
+                g2.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+                FontMetrics fm = g2.getFontMetrics();
+                g2.drawString(getText(), (getWidth()-fm.stringWidth(getText()))/2, (getHeight()+fm.getAscent())/2-2);
+                g2.dispose();
+            }
+        };
+        btn.setPreferredSize(size);
+        btn.setBackground(bg);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
-
+    private JTextField createStyledField() {
+        JTextField field = new JTextField();
+        field.setBackground(CLR_FIELD_BG);
+        field.setForeground(CLR_WHITE);
+        field.setCaretColor(CLR_WHITE);
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(255,255,255,30), 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        return field;
+    }
 }
