@@ -1,4 +1,4 @@
-package view;
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -42,9 +42,9 @@ public class LecturerDashboardView extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Faculty Management System - Midnight Edition");
+        setTitle("Faculty Management System ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1100, 800);
+        setSize(1000, 800);
         setLocationRelativeTo(null);
 
         // Main Gradient Background
@@ -67,7 +67,7 @@ public class LecturerDashboardView extends JFrame {
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(new EmptyBorder(10, 0, 40, 0));
 
-        JButton btnSave = createRoundedButton("SAVE CHANGES", new Dimension(220, 50), CLR_ACCENT, 16);
+        JButton btnSave = createRoundedButton("SAVE CHANGES", new Dimension(200, 40), CLR_ACCENT, 16);
         btnSave.addActionListener(e -> {
             refreshTable();
             JOptionPane.showMessageDialog(this, "Data Synchronized Successfully!");
@@ -314,4 +314,5 @@ public class LecturerDashboardView extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LecturerDashboardView().setVisible(true));
     }
+
 }
