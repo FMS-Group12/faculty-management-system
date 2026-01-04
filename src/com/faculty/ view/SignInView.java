@@ -3,6 +3,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 
+// --- SIGN IN PAGE ---
 public class SignInView extends JFrame {
 
     // --- COLORS ---
@@ -116,15 +117,12 @@ public class SignInView extends JFrame {
         lblRole.setAlignmentX(Component.CENTER_ALIGNMENT);
         content.add(lblRole);
         content.add(Box.createRigidArea(new Dimension(0,15)));
-
         content.add(createRolePanel());
-
         content.add(Box.createRigidArea(new Dimension(0,30)));
 
         JButton btnLogin = createRoundedButton("SIGN IN");
         btnLogin.addActionListener(e -> handleLogin());
         content.add(btnLogin);
-
         content.add(Box.createRigidArea(new Dimension(0,20)));
 
         JButton btnSignUp = new JButton("Don't have an account? Register");
@@ -192,7 +190,14 @@ public class SignInView extends JFrame {
 
         if(exists){
             JOptionPane.showMessageDialog(this,"Login successful as "+selectedRole+"!");
-            // Optional: Open dashboard based on role
+
+            // --- ONLY FOR ADMIN ---
+            if(selectedRole.equalsIgnoreCase("Admin")){
+                StudentDashboardView studentDashboard = new StudentDashboardView();
+                studentDashboard.setVisible(true);
+                this.dispose(); // Close login
+            }
+
         } else {
             JOptionPane.showMessageDialog(this,"Invalid credentials or role!", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -269,11 +274,4 @@ public class SignInView extends JFrame {
         SwingUtilities.invokeLater(() -> new SignInView().setVisible(true));
     }
 }
-
-
-
-
-
-
-
 
