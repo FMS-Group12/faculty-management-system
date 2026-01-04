@@ -5,301 +5,306 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.util.Vector;
 
-public class DegreeDashboardView extends JFrame {
+public class DepartmentDashboardView extends JFrame {
 
-    // Inside DegreeDashboardView class
-    private DegreeDAO degreeDAO = new DegreeDAO();
-    // --- COLOR PALETTE (Sage Green Theme) ---
-    // Desert Nocturne Palette
-    // Nordic Moss Palette
-    // Steel & Ice Palette
-    // --- REFINED PREMIUM PALETTE ---
+    // --- CONTROLLER ---
+    private DepartmentController controller = new DepartmentController();
 
-    private final Color CLR_BG = new Color(235, 233, 225);
-    private final Color CLR_HEADER_BG = new Color(70, 75, 60);
-    private final Color CLR_ACCENT = new Color(155, 150, 130);
-    private final Color CLR_NAV_BAR = new Color(225, 223, 215);
+    // --- MIDNIGHT GLASS PALETTE ---
+    private final Color CLR_BG_START   = new Color(20, 24, 42);
+    private final Color CLR_BG_END     = new Color(40, 45, 70);
+    private final Color CLR_GLASS_BG   = new Color(255, 255, 255, 15);
+    private final Color CLR_ACCENT     = new Color(212, 175, 55);
+    private final Color CLR_WHITE      = new Color(245, 245, 245);
+    private final Color CLR_FIELD_BG   = new Color(45, 50, 75);
+    private final Color CLR_NAV_BAR    = new Color(15, 18, 32);
+    private final Color CLR_LOGOUT     = new Color(255, 80, 80);
 
-    private final Font FONT_TITLE = new Font("Serif", Font.ITALIC | Font.BOLD, 36);
-    private final Font FONT_BTN = new Font("SansSerif", Font.BOLD, 12);
-    private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 12);
-    private final Font FONT_CELL = new Font("SansSerif", Font.PLAIN, 14);
-    private final Font FONT_NAV = new Font("SansSerif", Font.BOLD, 13);
+    // --- FONTS ---
+    private final Font FONT_TITLE  = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
+    private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 16);
+    private final Font FONT_CELL   = new Font("SansSerif", Font.PLAIN, 14);
+    private final Font FONT_NAV    = new Font("SansSerif", Font.BOLD, 18);
 
-    private DefaultTableModel degreeTableModel;
-    private JTable degreeTable;
+    private DefaultTableModel departmentTableModel;
+    private JTable departmentTable;
 
-    public DegreeDashboardView() {
+    public DepartmentDashboardView() {
         initializeUI();
+        refreshTableData();
     }
+
     private void initializeUI() {
-        setTitle("Faculty Management System - Admin Dashboard");
+        setTitle("Faculty Management System - Midnight Edition");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 800);
         setLocationRelativeTo(null);
 
-        // Main Container
-        JPanel rootPanel = new JPanel(new BorderLayout());
-        rootPanel.setBackground(CLR_BG);
-        setContentPane(rootPanel);
+        JPanel mainPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(0, 0, CLR_BG_START, 0, getHeight(), CLR_BG_END);
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        setContentPane(mainPanel);
 
-        // 1. ADD NAVIGATION BAR
-        rootPanel.add(createTopNavBar(), BorderLayout.NORTH);
+        mainPanel.add(createTopNavBar(), BorderLayout.NORTH);
+        mainPanel.add(createDepartmentsContent(), BorderLayout.CENTER);
 
-        // 2. ADD DEPARTMENTS CONTENT (This View acts as the Departments Page)
-        rootPanel.add(createDegreesContent(), BorderLayout.CENTER);
+        // Save Button (Optional Footer)
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        bottomPanel.setOpaque(false);
+        bottomPanel.setBorder(new EmptyBorder(10, 0, 40, 0));
+        JButton btnSave = createRoundedButton("REFRESH DATA", new Dimension(200, 40), CLR_ACCENT, 12);
+        btnSave.addActionListener(e -> refreshTableData());
+        bottomPanel.add(btnSave);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
     }
+
+    private void refreshTableData() {
+        departmentTableModel.setRowCount(0);
+        Vector<Vector<Object>> data = controller.getTableData();
+        for (Vector<Object> row : data) {
+            departmentTableModel.addRow(row);
+        }
+    }
+
+    // =========================================================
+    // UI ACTIONS
+    // =========================================================
+
+    private void showAddDepartmentDialog() {
+        JTextField txtName = createStyledField();
+        JTextField txtHOD = createStyledField();
+        JTextField txtStaff = createStyledField();
+        Object[] message = { "Name:", txtName, "HOD:", txtHOD, "Staff Count:", txtStaff };
+
+        if (JOptionPane.showConfirmDialog(this, message, "Add Department", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            try {
+                if (txtName.getText().isEmpty()) { JOptionPane.showMessageDialog(this, "Name Required!"); return; }
+                boolean success = controller.addDepartment(txtName.getText(), txtHOD.getText(), Integer.parseInt(txtStaff.getText()));
+                if(success) { JOptionPane.showMessageDialog(this, "Added!"); refreshTableData(); }
+            } catch (NumberFormatException ex) { JOptionPane.showMessageDialog(this, "Invalid Number!"); }
+        }
+    }
+
+    private void showEditDepartmentDialog() {
+        int selectedRow = departmentTable.getSelectedRow();
+        if (selectedRow == -1) { JOptionPane.showMessageDialog(this, "Select a row!"); return; }
+
+        int id = (int) departmentTable.getValueAt(selectedRow, 0);
+        JTextField txtName = createStyledField(); txtName.setText((String) departmentTable.getValueAt(selectedRow, 1));
+        JTextField txtHOD = createStyledField(); txtHOD.setText((String) departmentTable.getValueAt(selectedRow, 2));
+        JTextField txtStaff = createStyledField(); txtStaff.setText(String.valueOf(departmentTable.getValueAt(selectedRow, 3)));
+
+        Object[] message = { "Name:", txtName, "HOD:", txtHOD, "Staff Count:", txtStaff };
+
+        if (JOptionPane.showConfirmDialog(this, message, "Edit Department", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            try {
+                boolean success = controller.updateDepartment(id, txtName.getText(), txtHOD.getText(), Integer.parseInt(txtStaff.getText()));
+                if(success) { JOptionPane.showMessageDialog(this, "Updated!"); refreshTableData(); }
+            } catch (NumberFormatException ex) { JOptionPane.showMessageDialog(this, "Invalid Number!"); }
+        }
+    }
+
+    private void deleteSelectedRow() {
+        int selectedRow = departmentTable.getSelectedRow();
+        if (selectedRow != -1) {
+            int id = (int) departmentTable.getValueAt(selectedRow, 0);
+            if (JOptionPane.showConfirmDialog(this, "Delete ID: " + id + "?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                if(controller.deleteDepartment(id)) { JOptionPane.showMessageDialog(this, "Deleted!"); refreshTableData(); }
+            }
+        } else { JOptionPane.showMessageDialog(this, "Select a row!"); }
+    }
+
+    // =========================================================
+    // UI LAYOUT
+    // =========================================================
+
     private JPanel createTopNavBar() {
         JPanel navPanel = new JPanel(new BorderLayout());
         navPanel.setBackground(CLR_NAV_BAR);
-        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, CLR_ACCENT));
-        navPanel.setPreferredSize(new Dimension(getWidth(), 60));
+        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, new Color(255,255,255,30)));
+        navPanel.setPreferredSize(new Dimension(getWidth(), 70));
 
         JLabel lblWelcome = new JLabel("  Welcome, Admin");
         lblWelcome.setFont(FONT_NAV);
-        lblWelcome.setForeground(CLR_HEADER_BG);
+        lblWelcome.setForeground(CLR_ACCENT);
         navPanel.add(lblWelcome, BorderLayout.WEST);
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
-        buttonPanel.setBackground(CLR_NAV_BAR);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 25, 22));
+        buttonPanel.setOpaque(false);
 
         JButton btnStudents = createNavButton("Students");
         JButton btnLecturers = createNavButton("Lecturers");
-        JButton btnDegrees = createNavButton("Degrees");
+        JButton btnCourses = createNavButton("Courses");
         JButton btnDepartments = createNavButton("Departments");
+        JButton btnDegrees = createNavButton("Degrees");
         JButton btnLogout = createNavButton("Logout");
-        btnLogout.setForeground(new Color(180, 50, 50));
 
-        btnDegrees.addActionListener(e -> {
-            new DegreeDashboardView().setVisible(true); // Open Degrees page
-            this.dispose(); // Close current Department Dashboard
-        });
-        btnStudents.addActionListener(e -> {
-            new StudentDashboardView().setVisible(true); // Open Degrees page
-            this.dispose(); // Close current Department Dashboard
-        });
-        btnLecturers.addActionListener(e -> {
-            new LecturerDashboardView().setVisible(true); // Open Degrees page
-            this.dispose(); // Close current Department Dashboard
-        });
-        btnDepartments.addActionListener(e -> {
-            new DepartmentDashboardView().setVisible(true); // Open Degrees page
-            this.dispose(); // Close current Department Dashboard
-        });
+        // Active Tab Styling
+        btnDepartments.setForeground(CLR_ACCENT);
+        btnDepartments.setBorder(new MatteBorder(0, 0, 2, 0, CLR_ACCENT));
+
+        // Navigation
+        btnStudents.addActionListener(e -> { new StudentDashboardView().setVisible(true); dispose(); });
+        btnLecturers.addActionListener(e -> { new LecturerDashboardView().setVisible(true); dispose(); });
+        btnCourses.addActionListener(e -> { new CourseDashboardView().setVisible(true); dispose(); });
+        btnDepartments.addActionListener(e -> refreshTableData());
+        btnDegrees.addActionListener(e -> { new DegreeDashboardView().setVisible(true); dispose(); });
 
         btnLogout.addActionListener(e -> {
-            if(JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 new SignInView().setVisible(true);
-                this.dispose(); // Close Application or return to Login
+                dispose();
             }
         });
 
         buttonPanel.add(btnStudents);
         buttonPanel.add(btnLecturers);
+        buttonPanel.add(btnCourses);
         buttonPanel.add(btnDepartments);
         buttonPanel.add(btnDegrees);
-
         buttonPanel.add(btnLogout);
 
         navPanel.add(buttonPanel, BorderLayout.EAST);
         return navPanel;
     }
-    private JButton createNavButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(FONT_NAV);
-        btn.setForeground(CLR_HEADER_BG );
-        btn.setBackground(CLR_NAV_BAR);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setForeground(CLR_ACCENT.darker()); }
-            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setForeground(CLR_HEADER_BG); }
-        });
-        return btn;
-    }
-    private JPanel createDegreesContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(CLR_BG);
-        panel.setBorder(new EmptyBorder(30, 50, 30, 50));
 
-        JLabel lblTitle = new JLabel("Degrees", SwingConstants.CENTER);
+    private JPanel createDepartmentsContent() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(60, 50, 30, 50));
+
+        JLabel lblTitle = new JLabel("Departments", SwingConstants.CENTER);
         lblTitle.setFont(FONT_TITLE);
-        lblTitle.setForeground(CLR_HEADER_BG );
-        lblTitle.setBorder(new EmptyBorder(0, 0, 20, 0));
+        lblTitle.setForeground(CLR_WHITE);
         panel.add(lblTitle, BorderLayout.NORTH);
 
-        JPanel centerContainer = new JPanel(new BorderLayout());
-        centerContainer.setBackground(CLR_BG);
+        // Glass Table Container
+        JPanel tableContainer = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(CLR_GLASS_BG);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+            }
+        };
+        tableContainer.setOpaque(false);
+        tableContainer.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JPanel controlsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        controlsPanel.setBackground(CLR_BG);
-        controlsPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        controls.setOpaque(false);
+        JButton btnAdd = createRoundedButton("Add New", new Dimension(100, 35), CLR_ACCENT, 11);
+        JButton btnEdit = createRoundedButton("Edit", new Dimension(100, 35), CLR_ACCENT, 11);
+        JButton btnDelete = createRoundedButton("Delete", new Dimension(100, 35), CLR_ACCENT, 11);
 
-        JButton btnAdd = createActionButton("Add", true);
-        JButton btnEdit = createActionButton("Edit", true);
-        JButton btnDelete = createActionButton("Delete", true);
-
-        btnAdd.addActionListener(e -> showAddDegreeDialog());
-        btnEdit.addActionListener(e -> showEditDegreeDialog());
+        btnAdd.addActionListener(e -> showAddDepartmentDialog());
+        btnEdit.addActionListener(e -> showEditDepartmentDialog());
         btnDelete.addActionListener(e -> deleteSelectedRow());
 
-        controlsPanel.add(btnAdd);
-        controlsPanel.add(btnEdit);
-        controlsPanel.add(btnDelete);
-        centerContainer.add(controlsPanel, BorderLayout.NORTH);
+        controls.add(btnAdd); controls.add(btnEdit); controls.add(btnDelete);
+        tableContainer.add(controls, BorderLayout.NORTH);
+        tableContainer.add(createDepartmentTable(), BorderLayout.CENTER);
 
-        centerContainer.add(createDegreeTable(), BorderLayout.CENTER);
-        panel.add(centerContainer, BorderLayout.CENTER);
-
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        bottomPanel.setBackground(CLR_BG);
-        bottomPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
-
-        JButton btnSave = new JButton("Save changes");
-        btnSave.setFont(new Font("SansSerif", Font.BOLD, 14));
-        btnSave.setForeground(Color.WHITE);
-        btnSave.setBackground(CLR_HEADER_BG);
-        btnSave.setPreferredSize(new Dimension(200, 40));
-        btnSave.setFocusPainted(false);
-        btnSave.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnSave.addActionListener(e -> JOptionPane.showMessageDialog(this, "Changes saved successfully!"));
-
-        bottomPanel.add(btnSave);
-        panel.add(bottomPanel, BorderLayout.SOUTH);
-
+        panel.add(tableContainer, BorderLayout.CENTER);
         return panel;
     }
-    private void showAddDegreeDialog() {
-        JTextField txtDegree = new JTextField();
-        JTextField txtDepartment = new JTextField();
-        JTextField txtNoOfStudents = new JTextField();
-        Object[] message = {"Degree Name:", txtDegree, "Department:", txtDepartment, "No of Students:", txtNoOfStudents};
 
-        if (JOptionPane.showConfirmDialog(this, message, "Add Degree", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            String name = txtDegree.getText();
-            String dept = txtDepartment.getText();
-            int students = Integer.parseInt(txtNoOfStudents.getText().trim());
-
-            if (degreeDAO.addDegree(name, dept, students)) {
-                degreeTableModel.addRow(new Object[]{name, dept, String.valueOf(students)});
-            }
-        }
-    }
-
-    private void showEditDegreeDialog() {
-        int selectedRow = degreeTable.getSelectedRow();
-        if (selectedRow == -1) return;
-
-        String oldName = (String) degreeTableModel.getValueAt(selectedRow, 0);
-        JTextField txtDegree = new JTextField(oldName);
-        JTextField txtDept = new JTextField((String) degreeTableModel.getValueAt(selectedRow, 1));
-        JTextField txtStudents = new JTextField(degreeTableModel.getValueAt(selectedRow, 2).toString());
-
-        Object[] message = {"Degree Name:", txtDegree, "Department:", txtDept, "Students:", txtStudents};
-
-        if (JOptionPane.showConfirmDialog(this, message, "Edit Degree", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            if (degreeDAO.updateDegree(oldName, txtDegree.getText(), txtDept.getText(), Integer.parseInt(txtStudents.getText()))) {
-                degreeTableModel.setValueAt(txtDegree.getText(), selectedRow, 0);
-                degreeTableModel.setValueAt(txtDept.getText(), selectedRow, 1);
-                degreeTableModel.setValueAt(txtStudents.getText(), selectedRow, 2);
-            }
-        }
-    }
-    private void deleteSelectedRow() {
-        int selectedRow = degreeTable.getSelectedRow();
-        if (selectedRow != -1) {
-            String degreeName = (String) degreeTableModel.getValueAt(selectedRow, 0);
-            if (JOptionPane.showConfirmDialog(this, "Delete " + degreeName + "?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                if (degreeDAO.deleteDegree(degreeName)) {
-                    degreeTableModel.removeRow(selectedRow);
-                }
-            }
-        }
-    }
-    private JScrollPane createDegreeTable() {
-        String[] columns = {"Degree", "Department", "No of Students"};
-
-        // Fetch data from Database instead of hardcoded array
-        Vector<Vector<Object>> data = degreeDAO.getAllDegrees();
-
-        degreeTableModel = new DefaultTableModel(data, new Vector<>(java.util.Arrays.asList(columns))) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+    private JScrollPane createDepartmentTable() {
+        String[] columns = {"ID", "Name", "HOD", "No of Staff"};
+        departmentTableModel = new DefaultTableModel(columns, 0) {
+            @Override public boolean isCellEditable(int row, int column) { return false; }
         };
-        degreeTable = new JTable(degreeTableModel);
-        degreeTable.setRowHeight(45);
-        degreeTable.setFont(FONT_CELL);
-        degreeTable.setShowGrid(false);
-        degreeTable.setIntercellSpacing(new Dimension(0, 0));
-        degreeTable.setBackground(Color.WHITE);
-        degreeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        degreeTable.setFillsViewportHeight(true);
+        departmentTable = new JTable(departmentTableModel);
+        departmentTable.setRowHeight(45);
+        departmentTable.setFont(FONT_CELL);
+        departmentTable.setForeground(CLR_WHITE);
+        departmentTable.setBackground(new Color(0,0,0,0));
+        departmentTable.setOpaque(false);
+        departmentTable.setSelectionBackground(new Color(212, 175, 55, 60));
+        departmentTable.setSelectionForeground(CLR_ACCENT);
+        departmentTable.setShowGrid(false);
 
-        JTableHeader header = degreeTable.getTableHeader();
-        header.setDefaultRenderer(new DegreeDashboardView.HeaderRenderer());
-        header.setBackground(CLR_BG);
-        header.setPreferredSize(new Dimension(0, 50));
+        JTableHeader header = departmentTable.getTableHeader();
+        header.setBackground(new Color(255,255,255,10));
+        header.setForeground(CLR_ACCENT);
+        header.setFont(FONT_HEADER);
+        header.setPreferredSize(new Dimension(0, 45));
+        ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < degreeTable.getColumnCount(); i++) {
-            degreeTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        centerRenderer.setOpaque(true); // Must be true to show background color
+        centerRenderer.setBackground(new Color(0,0,0,0)); // Keep transparent for glass effect
+        centerRenderer.setForeground(CLR_WHITE);
+
+        for (int i = 0; i < departmentTable.getColumnCount(); i++) {
+            departmentTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
-        JScrollPane scrollPane = new JScrollPane(degreeTable);
-        scrollPane.setBorder(BorderFactory.createLineBorder(CLR_ACCENT, 1));
-        scrollPane.getViewport().setBackground(Color.WHITE);
-        return scrollPane;
+        departmentTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+        departmentTable.getColumnModel().getColumn(1).setPreferredWidth(250);
+
+        JScrollPane scroll = new JScrollPane(departmentTable);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        return scroll;
     }
 
-    private JButton createActionButton(String text, boolean isPrimary) {
+    private JButton createNavButton(String text) {
         JButton btn = new JButton(text);
-        btn.setFont(FONT_BTN);
+        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+        if (text.equals("Logout")) btn.setForeground(CLR_LOGOUT);
+        else btn.setForeground(CLR_WHITE);
+
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        if (isPrimary) {
-            btn.setBackground(CLR_HEADER_BG);
-            btn.setForeground(Color.WHITE);
-            btn.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
-        } else {
-            btn.setBackground(CLR_ACCENT);
-            btn.setForeground(Color.WHITE);
-            btn.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
-        }
+
+        btn.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { btn.setForeground(CLR_ACCENT); }
+            @Override public void mouseExited(MouseEvent e) {
+                if (text.equals("Logout")) btn.setForeground(CLR_LOGOUT);
+                else if (text.equals("Departments")) btn.setForeground(CLR_ACCENT);
+                else btn.setForeground(CLR_WHITE);
+            }
+        });
         return btn;
     }
-    private class HeaderRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            label.setBackground(CLR_BG);
-            return new DegreeDashboardView.PillHeaderPanel(value.toString());
-        }
+
+    private JButton createRoundedButton(String text, Dimension size, Color bg, int fontSize) {
+        JButton btn = new JButton(text) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 15, 15));
+                g2.setColor(getBackground() == CLR_ACCENT ? CLR_BG_START : CLR_WHITE);
+                g2.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+                FontMetrics fm = g2.getFontMetrics();
+                g2.drawString(getText(), (getWidth()-fm.stringWidth(getText()))/2, (getHeight()+fm.getAscent())/2-2);
+                g2.dispose();
+            }
+        };
+        btn.setPreferredSize(size); btn.setBackground(bg); btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false); btn.setFocusPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 
-    private class PillHeaderPanel extends JPanel {
-        private String text;
-        public PillHeaderPanel(String text) { this.text = text; setOpaque(false); }
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(CLR_HEADER_BG);
-            g2.fillRoundRect(2, 5, getWidth() - 4, getHeight() - 10, 20, 20);
-            g2.setColor(Color.WHITE);
-            FontMetrics fm = g2.getFontMetrics(FONT_HEADER);
-            int x = (getWidth() - fm.stringWidth(text)) / 2;
-            int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
-            g2.setFont(FONT_HEADER);
-            g2.drawString(text, x, y);
-        }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new DegreeDashboardView().setVisible(true);
-        });
+    private JTextField createStyledField() {
+        JTextField field = new JTextField(); field.setBackground(CLR_FIELD_BG);
+        field.setForeground(CLR_WHITE); field.setCaretColor(CLR_WHITE);
+        return field;
     }
 }
