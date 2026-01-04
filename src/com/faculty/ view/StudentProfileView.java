@@ -26,7 +26,7 @@ public class StudentProfileView extends JFrame {
     // ===== FIELDS =====
     private JTextField txtStudentId, txtName, txtEmail, txtMobile, txtDegree, txtUserId;
 
-    private StudentDAO dao = new StudentDAO();
+    private StudentDAO1 dao = new StudentDAO1();
     private String currentStudentName = "Student";
 
     public StudentProfileView() {
@@ -88,18 +88,18 @@ public class StudentProfileView extends JFrame {
         btnProfile.setForeground(CLR_ACCENT);
         btnProfile.setBorder(new MatteBorder(0, 0, 2, 0, CLR_ACCENT));
 
-        btnTimetable.addActionListener(e -> {
-            new TimeTableView(currentStudentName).setVisible(true);
-            dispose();
-        });
-
-        btnLogout.addActionListener(e -> {
-            if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm",
-                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                new SignInView().setVisible(true);
-                dispose();
-            }
-        });
+//        btnTimetable.addActionListener(e -> {
+//            new TimeTableView(currentStudentName).setVisible(true);
+//            dispose();
+//        });
+//
+//        btnLogout.addActionListener(e -> {
+//            if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm",
+//                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+//                new SignInView().setVisible(true);
+//                dispose();
+//            }
+//        });
 
         buttonPanel.add(btnProfile);
         buttonPanel.add(btnTimetable);
