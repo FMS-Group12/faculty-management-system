@@ -128,8 +128,8 @@ public class LecturerDashboardView extends JFrame {
         controls.setBackground(CLR_BG);
 
         JButton btnAdd = createActionButton("Add new", true);
-        JButton btnEdit = createActionButton("Edit", false);
-        JButton btnDelete = createActionButton("Delete", false);
+        JButton btnEdit = createActionButton("Edit", true);
+        JButton btnDelete = createActionButton("Delete", true);
 
         btnAdd.addActionListener(e -> showAddLecturerDialog());
         btnEdit.addActionListener(e -> showEditLecturerDialog());
@@ -303,3 +303,4 @@ public class LecturerDashboardView extends JFrame {
         SwingUtilities.invokeLater(() -> new LecturerDashboardView().setVisible(true));
     }
 }
+
