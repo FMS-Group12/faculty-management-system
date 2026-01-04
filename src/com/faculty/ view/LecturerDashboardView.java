@@ -7,7 +7,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.util.Map;
 
 public class LecturerDashboardView extends JFrame {
 
@@ -87,34 +86,52 @@ public class LecturerDashboardView extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         buttonPanel.setBackground(CLR_NAV_BAR);
 
+        // --- BUTTON DEFINITIONS ---
         JButton btnStudents = createNavButton("Students");
         JButton btnLecturers = createNavButton("Lecturers");
+        JButton btnCourses = createNavButton("Courses");
         JButton btnDepartments = createNavButton("Departments");
         JButton btnDegrees = createNavButton("Degrees");
         JButton btnLogout = createNavButton("Logout");
 
         // Highlight Active Tab
         btnLecturers.setBorder(new MatteBorder(0, 0, 2, 0, CLR_HEADER_BG));
-
-        // Style Logout Button
         btnLogout.setForeground(CLR_LOGOUT);
 
-        // Navigation Actions
-        btnStudents.addActionListener(e -> { new StudentDashboardView().setVisible(true); this.dispose(); });
-        btnDepartments.addActionListener(e -> { new DepartmentDashboardView().setVisible(true); this.dispose(); });
-        btnDegrees.addActionListener(e -> { new DegreeDashboardView().setVisible(true); this.dispose(); });
+        // --- NAVIGATION LOGIC ---
+        btnStudents.addActionListener(e -> { new StudentDashboardView().setVisible(true); dispose(); });
 
-        // LOGOUT LOGIC: Return to Sign In View
+        btnLecturers.addActionListener(e -> refreshTable());
+
+        btnCourses.addActionListener(e -> {
+            // new CourseDashboardView().setVisible(true);
+            // dispose();
+        });
+
+        btnDepartments.addActionListener(e -> { new DepartmentDashboardView().setVisible(true); dispose(); });
+
+        btnDegrees.addActionListener(e -> { new DegreeDashboardView().setVisible(true); dispose(); });
+
+        // --- UPDATED LOGOUT LOGIC ---
         btnLogout.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to logout?", "Logout", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to logout?",
+                    "Logout Confirmation",
+                    JOptionPane.YES_NO_OPTION
+            );
+
             if (confirm == JOptionPane.YES_OPTION) {
-                new SignInView().setVisible(true); // Switches to SignIn form
-                this.dispose();                   // Closes current dashboard
+                // This line ensures the SignInView is opened before closing the dashboard
+                new SignInView().setVisible(true);
+                dispose();
             }
         });
 
+        // --- ADD TO PANEL IN SPECIFIC ORDER ---
         buttonPanel.add(btnStudents);
         buttonPanel.add(btnLecturers);
+        buttonPanel.add(btnCourses);
         buttonPanel.add(btnDepartments);
         buttonPanel.add(btnDegrees);
         buttonPanel.add(btnLogout);
@@ -151,7 +168,6 @@ public class LecturerDashboardView extends JFrame {
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         controls.setBackground(CLR_BG);
 
-        // UNIFORM BUTTON SIZES
         JButton btnAdd = createActionButton("Add new", true);
         JButton btnEdit = createActionButton("Edit", true);
         JButton btnDelete = createActionButton("Delete", true);
@@ -168,15 +184,115 @@ public class LecturerDashboardView extends JFrame {
         return panel;
     }
 
-    // Placeholder Logic for Table/Dialogs
-    private void showAddLecturerDialog() { /* logic here */ }
-    private void showEditLecturerDialog() { /* logic here */ }
+    // 1. Updated Add Dialog using a Dropdown for Departments
+    private void showAddLecturerDialog() {
+        JTextField nameF = new JTextField();
+        JTextField courF = new JTextField();
+        JTextField emailF = new JTextField();
+        JTextField mobF = new JTextField();
 
+        // Fetch Departments from DAO for the dropdown
+        java.util.Map<String, Integer> deptMap = lectureDAO.getDepartmentMap();
+        JComboBox<String> deptCombo = new JComboBox<>(deptMap.keySet().toArray(new String[0]));
+
+        Object[] fields = {
+                "Full Name:", nameF,
+                "Department:", deptCombo,
+                "Courses:", courF,
+                "Email:", emailF,
+                "Mobile No:", mobF
+        };
+
+        int result = JOptionPane.showConfirmDialog(this, fields, "Add New Lecturer", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            // Get the ID associated with the selected Department Name
+            String selectedDeptName = (String) deptCombo.getSelectedItem();
+            String deptId = String.valueOf(deptMap.get(selectedDeptName));
+
+            boolean success = lectureDAO.addLecturer(
+                    nameF.getText(),
+                    deptId, // Passes ID as String to match your DAO parameter
+                    courF.getText(),
+                    emailF.getText(),
+                    mobF.getText()
+            );
+
+            if (success) {
+                refreshTable();
+                JOptionPane.showMessageDialog(this, "Lecturer added successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Error adding lecturer. Check console for details.");
+            }
+        }
+    }
+
+    // 2. Updated Edit Dialog
+    private void showEditLecturerDialog() {
+        int row = lecturerTable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a lecturer to edit.");
+            return;
+        }
+
+        // Current Values from Table
+        String originalEmail = (String) lecturerTableModel.getValueAt(row, 3);
+        JTextField nameF = new JTextField((String) lecturerTableModel.getValueAt(row, 0));
+        JTextField courF = new JTextField((String) lecturerTableModel.getValueAt(row, 2));
+        JTextField emailF = new JTextField(originalEmail);
+        JTextField mobF = new JTextField((String) lecturerTableModel.getValueAt(row, 4));
+
+        // Department Dropdown
+        java.util.Map<String, Integer> deptMap = lectureDAO.getDepartmentMap();
+        JComboBox<String> deptCombo = new JComboBox<>(deptMap.keySet().toArray(new String[0]));
+        deptCombo.setSelectedItem(lecturerTableModel.getValueAt(row, 1)); // Select current dept
+
+        Object[] fields = {
+                "Full Name:", nameF,
+                "Department:", deptCombo,
+                "Courses:", courF,
+                "Email:", emailF,
+                "Mobile No:", mobF
+        };
+
+        int result = JOptionPane.showConfirmDialog(this, fields, "Edit Lecturer", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String selectedDeptName = (String) deptCombo.getSelectedItem();
+            String deptId = String.valueOf(deptMap.get(selectedDeptName));
+
+            boolean success = lectureDAO.updateLecturer(
+                    nameF.getText(),
+                    deptId,
+                    courF.getText(),
+                    emailF.getText(),
+                    mobF.getText(),
+                    originalEmail
+            );
+
+            if (success) {
+                refreshTable();
+                JOptionPane.showMessageDialog(this, "Updated successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Update failed.");
+            }
+        }
+    }
+
+    // 3. Updated Delete to call your DAO correctly
     private void deleteSelectedRow() {
-        int selectedRow = lecturerTable.getSelectedRow();
-        if (selectedRow != -1) {
-            if (JOptionPane.showConfirmDialog(this, "Delete selected lecturer?", "Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                lecturerTableModel.removeRow(selectedRow);
+        int row = lecturerTable.getSelectedRow();
+        if (row != -1) {
+            String email = (String) lecturerTableModel.getValueAt(row, 3);
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete " + email + "?", "Delete", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (lectureDAO.deleteLecturer(email)) {
+                    refreshTable();
+                    JOptionPane.showMessageDialog(this, "Deleted successfully.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Delete failed.");
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select a row to delete.");
@@ -211,7 +327,6 @@ public class LecturerDashboardView extends JFrame {
 
     private JButton createActionButton(String text, boolean primary) {
         JButton btn = new JButton(text);
-        // FIXED UNIFORM SIZE FOR ALL ACTION BUTTONS
         btn.setPreferredSize(new Dimension(110, 35));
         btn.setFont(FONT_BTN);
         btn.setBackground(primary ? CLR_HEADER_BG : CLR_ACCENT);
