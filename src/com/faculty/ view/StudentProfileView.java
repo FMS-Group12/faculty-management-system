@@ -242,7 +242,7 @@ public class StudentProfileView extends JFrame {
             return;
         }
 
-        Student s = dao.getStudentById(id);
+        Student1 s = dao.getStudentById(id);
         if (s == null) {
             JOptionPane.showMessageDialog(this, "Student not found!");
             return;
@@ -256,7 +256,7 @@ public class StudentProfileView extends JFrame {
     }
 
     private void updateStudentInDB() {
-        Student s = new Student(
+        Student1 s = new Student1(
                 txtStudentId.getText().trim(),
                 txtName.getText().trim(),
                 txtEmail.getText().trim(),
