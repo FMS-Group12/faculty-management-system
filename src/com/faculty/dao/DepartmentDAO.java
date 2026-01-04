@@ -8,7 +8,7 @@ public class DepartmentDAO {
     private final String DB_USER = "root";
     private final String DB_PASS = "";
 
-    // --- READ ---
+    
     public Vector<Vector<Object>> getAllDepartments() {
         Vector<Vector<Object>> data = new Vector<>();
         String query = "SELECT * FROM departments";
@@ -32,7 +32,7 @@ public class DepartmentDAO {
         return data;
     }
 
-    // --- ADD ---
+
     public boolean addDepartment(String name, String hod, int staff) {
         String query = "INSERT INTO departments (name, hod, no_of_staff) VALUES (?, ?, ?)";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
@@ -47,7 +47,7 @@ public class DepartmentDAO {
         }
     }
 
-    // --- UPDATE ---
+ 
     public boolean updateDepartment(int id, String name, String hod, int staff) {
         String query = "UPDATE departments SET name=?, hod=?, no_of_staff=? WHERE department_id=?";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
@@ -63,7 +63,7 @@ public class DepartmentDAO {
         }
     }
 
-    // --- DELETE ---
+   
     public boolean deleteDepartment(int id) {
         String query = "DELETE FROM departments WHERE department_id=?";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
