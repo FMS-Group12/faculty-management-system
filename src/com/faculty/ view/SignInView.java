@@ -189,12 +189,12 @@ public class SignInView extends JFrame {
         boolean exists = dao.loginUserWithRole(user, pass, selectedRole);
 
         if(exists){
-            JOptionPane.showMessageDialog(this,"Login successful as "+selectedRole+"!");
+            //JOptionPane.showMessageDialog(this,"Login successful as "+selectedRole+"!");
 
             // --- ONLY FOR ADMIN ---
             if(selectedRole.equalsIgnoreCase("Admin")){
-                StudentDashboardView studentDashboard = new StudentDashboardView();
-                studentDashboard.setVisible(true);
+                AdminView adminview = new AdminView();
+                adminview.setVisible(true);
                 this.dispose(); // Close login
             }
 
@@ -270,8 +270,4 @@ public class SignInView extends JFrame {
         }
     }
 
-    public static void main(String[] args){
-        SwingUtilities.invokeLater(() -> new SignInView().setVisible(true));
-    }
 }
-
