@@ -6,8 +6,6 @@ import java.util.Vector;
 
 public class DegreeDAO {
 
-    // ================= READ =================
-    // Used to populate JTable
     public Vector<Vector<Object>> getAllDegrees() {
 
         Vector<Vector<Object>> data = new Vector<>();
@@ -32,7 +30,6 @@ public class DegreeDAO {
         return data;
     }
 
-    // ================= CREATE =================
     public boolean addDegree(String degreeName,
                              String departmentName,
                              int numberOfStudents) {
@@ -56,7 +53,6 @@ public class DegreeDAO {
         }
     }
 
-    // ================= UPDATE =================
     public boolean updateDegree(String oldDegreeName,
                                 String newDegreeName,
                                 String departmentName,
@@ -83,7 +79,6 @@ public class DegreeDAO {
         }
     }
 
-    // ================= DELETE =================
     public boolean deleteDegree(String degreeName) {
 
         String sql = "DELETE FROM degrees WHERE degree = ?";
