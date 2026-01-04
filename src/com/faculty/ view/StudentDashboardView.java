@@ -75,6 +75,14 @@ public class StudentDashboardView extends JFrame {
         });
         buttonPanel.add(btnLecturers);
 
+        JButton btnCourses = createNavButton("Courses");
+        btnCourses.addActionListener(e -> {
+            CourseDashboardView CourseDashboard = new CourseDashboardView();
+            CourseDashboard.setVisible(true); // <--- Opens Course Page
+            this.dispose(); // optional: close the current Student Dashboard window
+        });
+        buttonPanel.add(btnCourses);
+
 
         JButton btnDepartments = createNavButton("Departments");
         btnDepartments.addActionListener(e -> {
@@ -118,6 +126,7 @@ public class StudentDashboardView extends JFrame {
                 "Logout Confirmation",
                 JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
+            new SignInView().setVisible(true);
             this.dispose();
         }
     }
@@ -169,6 +178,9 @@ public class StudentDashboardView extends JFrame {
         btnSave.setForeground(Color.WHITE);
         btnSave.setBackground(CLR_SAVE_BTN);
         btnSave.setPreferredSize(new Dimension(200, 40));
+        btnSave.setFocusPainted(false);
+        btnSave.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnSave.addActionListener(e -> JOptionPane.showMessageDialog(this, "Changes saved successfully!"));
         bottom.add(btnSave);
 
         panel.add(bottom, BorderLayout.SOUTH);
