@@ -38,7 +38,7 @@ CREATE TABLE lecturers (
     email VARCHAR(100),
     mobile_no VARCHAR(15),
     department_id INT,
-    couses VARCHAR(255),
+    courses VARCHAR(255),
     user_id INT,
     FOREIGN KEY (department_id) REFERENCES departments(department_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -60,6 +60,7 @@ CREATE TABLE enrollments (
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (course_code) REFERENCES courses(course_code)
 );
+
 
 
 
