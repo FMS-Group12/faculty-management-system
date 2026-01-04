@@ -1,4 +1,4 @@
-package view;
+
 
 import java.sql.*;
 import javax.swing.table.DefaultTableModel;
@@ -116,4 +116,5 @@ public class LectureDAO {
             return false;
         }
     }
+
 }
