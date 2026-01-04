@@ -5,6 +5,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.sql.*;
 
 public class StudentDashboardView extends JFrame {
 
@@ -28,6 +29,7 @@ public class StudentDashboardView extends JFrame {
 
     public StudentDashboardView() {
         initializeUI();
+        loadStudentsFromDatabase(); // load data from MySQL
     }
 
     private void initializeUI() {
@@ -61,13 +63,37 @@ public class StudentDashboardView extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         buttonPanel.setBackground(CLR_NAV_BAR);
 
-        buttonPanel.add(createNavButton("Students"));
-        buttonPanel.add(createNavButton("Lecturers"));
-        buttonPanel.add(createNavButton("Departments"));
-        buttonPanel.add(createNavButton("Degrees"));
+        JButton btnStudents = createNavButton("Students");
+        btnStudents.addActionListener(e -> loadStudentsFromDatabase());
+        buttonPanel.add(btnStudents);
 
-        // Active Logout button
+        JButton btnLecturers = createNavButton("Lecturers");
+        btnLecturers.addActionListener(e -> {
+            LecturerDashboardView lecturerDashboard = new LecturerDashboardView();
+            lecturerDashboard.setVisible(true);
+            this.dispose(); // optional: close the current Student Dashboard window
+        });
+        buttonPanel.add(btnLecturers);
+
+
+        JButton btnDepartments = createNavButton("Departments");
+        btnDepartments.addActionListener(e -> {
+            DepartmentDashboardView departmentDashboard = new DepartmentDashboardView();
+            departmentDashboard.setVisible(true);
+            this.dispose(); // optional: close Student Dashboard
+        });
+        buttonPanel.add(btnDepartments);
+
+        JButton btnDegrees = createNavButton("Degrees");
+        btnDegrees.addActionListener(e -> {
+            DegreeDashboardView degreeDashboard = new DegreeDashboardView();
+            degreeDashboard.setVisible(true);
+            this.dispose(); // optional: close Student Dashboard
+        });
+        buttonPanel.add(btnDegrees);
+
         JButton btnLogout = createNavButton("Logout");
+        btnLogout.setForeground(new Color(180, 50, 50));
         btnLogout.addActionListener(e -> logoutAction());
         buttonPanel.add(btnLogout);
 
@@ -93,8 +119,6 @@ public class StudentDashboardView extends JFrame {
                 JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             this.dispose();
-            // If you have SignIn page, uncomment next line:
-            // new SignInPage().setVisible(true);
         }
     }
 
@@ -112,18 +136,16 @@ public class StudentDashboardView extends JFrame {
         lblTitle.setBorder(new EmptyBorder(0, 0, 20, 0));
         panel.add(lblTitle, BorderLayout.NORTH);
 
-        // Center panel with BoxLayout
         Box centerBox = Box.createVerticalBox();
         centerBox.setBackground(CLR_BG);
 
-        // Buttons panel
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         controls.setBackground(CLR_BG);
         controls.setBorder(new EmptyBorder(0, 0, 20, 0));
 
         JButton btnAdd = createActionButton("Add new", true);
-        JButton btnEdit = createActionButton("Edit", false);
-        JButton btnDelete = createActionButton("Delete", false);
+        JButton btnEdit = createActionButton("Edit", true);
+        JButton btnDelete = createActionButton("Delete", true);
 
         btnAdd.addActionListener(e -> addStudent());
         btnEdit.addActionListener(e -> editStudent());
@@ -158,17 +180,8 @@ public class StudentDashboardView extends JFrame {
     // =========================================================
     private JScrollPane createStudentTable() {
         String[] columns = {"Full Name", "Student ID", "Degree", "Email", "Mobile Number"};
-
-        Object[][] data = {
-                {"Kumar Sangakkara", "ET/2022/007", "Engineering Technology", "kumars@kln.ac.lk", "0123456789"},
-                {"Kumar Sangakkara", "ET/2022/007", "Engineering Technology", "kumars@kln.ac.lk", "0123456789"},
-                {"Kumar Sangakkara", "ET/2022/007", "Engineering Technology", "kumars@kln.ac.lk", "0123456789"},
-        };
-
-        studentTableModel = new DefaultTableModel(data, columns) {
-            public boolean isCellEditable(int r, int c) {
-                return false;
-            }
+        studentTableModel = new DefaultTableModel(columns, 0) {
+            public boolean isCellEditable(int r, int c) { return false; }
         };
 
         studentTable = new JTable(studentTableModel);
@@ -194,65 +207,82 @@ public class StudentDashboardView extends JFrame {
     }
 
     // =========================================================
-    // CRUD METHODS
+    // CRUD METHODS USING DAO
     // =========================================================
+    private void loadStudentsFromDatabase() {
+        try (Connection con = dbc.getConnection()) {
+            studentTableModel.setRowCount(0);
+            ResultSet rs = StudentDAO.getAllStudents(con);
+            while (rs.next()) {
+                studentTableModel.addRow(new Object[]{
+                        rs.getString("fullname"),
+                        rs.getString("student_id"),
+                        rs.getString("degree"),
+                        rs.getString("email"),
+                        rs.getString("mobile_no")
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "DB Error: " + e.getMessage());
+        }
+    }
+
     private void addStudent() {
         JTextField n = new JTextField();
         JTextField id = new JTextField();
-        JTextField d = new JTextField();
+        JTextField degree = new JTextField();
         JTextField e = new JTextField();
         JTextField m = new JTextField();
 
-        Object[] msg = {"Full Name:", n, "Student ID:", id, "Degree:", d, "Email:", e, "Mobile:", m};
+        Object[] msg = {"Full Name:", n, "Student ID:", id, "Degree:", degree, "Email:", e, "Mobile:", m};
 
-        if (JOptionPane.showConfirmDialog(this, msg, "Add Student",
-                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            studentTableModel.addRow(new Object[]{
-                    n.getText(), id.getText(), d.getText(), e.getText(), m.getText()
-            });
+        if (JOptionPane.showConfirmDialog(this, msg, "Add Student", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            try (Connection con = dbc.getConnection()) {
+                StudentDAO.insertStudent(con, id.getText(), n.getText(), degree.getText(), e.getText(), m.getText());
+                loadStudentsFromDatabase();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "DB Error: " + ex.getMessage());
+            }
         }
     }
 
     private void editStudent() {
         int r = studentTable.getSelectedRow();
         if (r == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a student to edit.", "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a student to edit.");
             return;
         }
 
-        // Current values
-        String currentName = (String) studentTableModel.getValueAt(r, 0);
-        String currentID = (String) studentTableModel.getValueAt(r, 1);
-        String currentDegree = (String) studentTableModel.getValueAt(r, 2);
-        String currentEmail = (String) studentTableModel.getValueAt(r, 3);
-        String currentMobile = (String) studentTableModel.getValueAt(r, 4);
+        JTextField n = new JTextField((String) studentTableModel.getValueAt(r, 0));
+        JTextField id = new JTextField((String) studentTableModel.getValueAt(r, 1));
+        JTextField degree = new JTextField((String) studentTableModel.getValueAt(r, 2));
+        JTextField e = new JTextField((String) studentTableModel.getValueAt(r, 3));
+        JTextField m = new JTextField((String) studentTableModel.getValueAt(r, 4));
 
-        // Text fields prefilled
-        JTextField n = new JTextField(currentName);
-        JTextField id = new JTextField(currentID);
-        JTextField d = new JTextField(currentDegree);
-        JTextField e = new JTextField(currentEmail);
-        JTextField m = new JTextField(currentMobile);
+        Object[] msg = {"Full Name:", n, "Student ID:", id, "Degree:", degree, "Email:", e, "Mobile:", m};
 
-        Object[] msg = {"Full Name:", n, "Student ID:", id, "Degree:", d, "Email:", e, "Mobile:", m};
-
-        if (JOptionPane.showConfirmDialog(this, msg, "Edit Student",
-                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            // Update table
-            studentTableModel.setValueAt(n.getText(), r, 0);
-            studentTableModel.setValueAt(id.getText(), r, 1);
-            studentTableModel.setValueAt(d.getText(), r, 2);
-            studentTableModel.setValueAt(e.getText(), r, 3);
-            studentTableModel.setValueAt(m.getText(), r, 4);
+        if (JOptionPane.showConfirmDialog(this, msg, "Edit Student", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            try (Connection con = dbc.getConnection()) {
+                StudentDAO.updateStudent(con, id.getText(), n.getText(), degree.getText(), e.getText(), m.getText());
+                loadStudentsFromDatabase();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "DB Error: " + ex.getMessage());
+            }
         }
     }
 
     private void deleteStudent() {
         int r = studentTable.getSelectedRow();
-        if (r != -1) {
-            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this student?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                studentTableModel.removeRow(r);
+        if (r == -1) return;
+
+        if (JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this student?",
+                "Confirm Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            try (Connection con = dbc.getConnection()) {
+                String studentId = (String) studentTableModel.getValueAt(r, 1);
+                StudentDAO.deleteStudent(con, studentId);
+                loadStudentsFromDatabase();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "DB Error: " + ex.getMessage());
             }
         }
     }
@@ -266,9 +296,6 @@ public class StudentDashboardView extends JFrame {
         return btn;
     }
 
-    // =========================================================
-    // TABLE HEADER RENDERER
-    // =========================================================
     private class HeaderRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean s, boolean f, int r, int c) {
             return new PillHeaderPanel(value.toString());
@@ -292,9 +319,6 @@ public class StudentDashboardView extends JFrame {
         }
     }
 
-    // =========================================================
-    // MAIN
-    // =========================================================
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new StudentDashboardView().setVisible(true));
     }
