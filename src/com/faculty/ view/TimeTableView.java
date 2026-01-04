@@ -10,7 +10,7 @@ import java.awt.event.MouseEvent;
 
 public class TimeTableView extends JFrame {
 
-    // --- MIDNIGHT GLASS PALETTE ---
+  
     private final Color CLR_BG_START   = new Color(20, 24, 42);
     private final Color CLR_BG_END     = new Color(40, 45, 70);
     private final Color CLR_GLASS_BG   = new Color(255, 255, 255, 15);
@@ -19,7 +19,7 @@ public class TimeTableView extends JFrame {
     private final Color CLR_NAV_BAR    = new Color(15, 18, 32);
     private final Color CLR_LOGOUT     = new Color(255, 80, 80); // Red
 
-    // Fonts
+
     private final Font FONT_NAV      = new Font("SansSerif", Font.BOLD, 14);
     private final Font FONT_TITLE    = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
     private final Font FONT_SUBTITLE = new Font("SansSerif", Font.PLAIN, 14);
@@ -51,10 +51,9 @@ public class TimeTableView extends JFrame {
         };
         setContentPane(rootPanel);
 
-        // 1. ADD NAVIGATION BAR
+
         rootPanel.add(createTopNavBar(), BorderLayout.NORTH);
 
-        // 2. ADD TIMETABLE CONTENT
         rootPanel.add(createTimetablePanel(), BorderLayout.CENTER);
     }
 
@@ -67,13 +66,12 @@ public class TimeTableView extends JFrame {
         navPanel.setBorder(new MatteBorder(0, 0, 1, 0, new Color(255, 255, 255, 30)));
         navPanel.setPreferredSize(new Dimension(getWidth(), 70));
 
-        // Welcome Message
         JLabel lblWelcome = new JLabel("  Welcome, " + currentStudentName);
         lblWelcome.setFont(FONT_NAV);
         lblWelcome.setForeground(CLR_ACCENT);
         navPanel.add(lblWelcome, BorderLayout.WEST);
 
-        // Buttons
+     
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 22));
         buttonPanel.setOpaque(false);
 
@@ -82,13 +80,11 @@ public class TimeTableView extends JFrame {
         JButton btnCourses = createNavButton("Courses");
         JButton btnLogout = createNavButton("Logout");
 
-        // Set Active State
+       
         btnTimetable.setForeground(CLR_ACCENT);
         btnTimetable.setBorder(new MatteBorder(0, 0, 2, 0, CLR_ACCENT));
 
-        // --- NAVIGATION LOGIC ---
-        // btnProfile.addActionListener(e -> { new StudentProfileView().setVisible(true); dispose(); });
-        // btnCourses.addActionListener(e -> { new StudentCoursesView().setVisible(true); dispose(); });
+        
 
         btnLogout.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION);
@@ -202,13 +198,13 @@ public class TimeTableView extends JFrame {
         table.setOpaque(false);
         table.setFillsViewportHeight(true);
 
-        // Header
+        
         JTableHeader header = table.getTableHeader();
         header.setDefaultRenderer(new HeaderRenderer());
         header.setBackground(new Color(255, 255, 255, 10));
         header.setPreferredSize(new Dimension(0, 50));
 
-        // Cell Renderer
+        
         MidnightCellRenderer cellRenderer = new MidnightCellRenderer();
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
@@ -222,7 +218,7 @@ public class TimeTableView extends JFrame {
         return scrollPane;
     }
 
-    // --- RENDERERS ---
+ 
 
     private class HeaderRenderer extends DefaultTableCellRenderer {
         @Override
