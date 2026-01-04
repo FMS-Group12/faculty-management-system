@@ -1,4 +1,4 @@
-package view;
+
 
 
 
@@ -42,3 +42,4 @@ public class SignUpDAO {
         } catch(SQLException e){ e.printStackTrace(); return false; }
     }
 }
+
