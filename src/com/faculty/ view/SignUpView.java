@@ -1,4 +1,4 @@
-package view;
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -293,4 +293,5 @@ public class SignUpView extends JFrame {
 }
 
 // --- Placeholder Classes to ensure the code compiles ---
+
 
