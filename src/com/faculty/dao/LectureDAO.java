@@ -1,13 +1,11 @@
-
-
 import java.sql.*;
 import java.util.*;
 
 public class LectureDAO {
 
     /**
-     * READ: Fetches data using an LEFT JOIN to show Department Name.
-     * Returns a Vector of Vectors to match the Department/Degree pattern.
+     * READ: Fetches data using a LEFT JOIN to ensure lecturers with NULL
+     * user_id or department_id are still displayed.
      */
     public Vector<Vector<Object>> getAllLecturers() {
         Vector<Vector<Object>> data = new Vector<>();
@@ -22,7 +20,7 @@ public class LectureDAO {
             while (rs.next()) {
                 Vector<Object> row = new Vector<>();
                 row.add(rs.getString("fullname"));
-                row.add(rs.getString("name"));     // Department Name from Joined table
+                row.add(rs.getString("name") != null ? rs.getString("name") : "Unassigned");
                 row.add(rs.getString("courses"));
                 row.add(rs.getString("email"));
                 row.add(rs.getString("mobile_no"));
@@ -54,24 +52,27 @@ public class LectureDAO {
     }
 
     /**
-     * CREATE: Inserts a record including the user_id lookup.
+     * CREATE: Logic to handle user_id lookup. If the name is not in the users table,
+     * user_id will be set to NULL.
      */
     public boolean addLecturer(String name, String deptId, String courses, String email, String mobile) {
-        // We removed the user_id for now because your database shows many are NULL
-        String sql = "INSERT INTO lecturers (fullname, department_id, courses, email, mobile_no) VALUES (?, ?, ?, ?, ?)";
+        // Subquery looks for user_id based on name; returns NULL if not found.
+        String sql = "INSERT INTO lecturers (fullname, department_id, courses, email, mobile_no, user_id) " +
+                "VALUES (?, ?, ?, ?, ?, (SELECT user_id FROM users WHERE username = ? LIMIT 1))";
 
         try (Connection conn = dbc.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, name);
-            pstmt.setInt(2, Integer.parseInt(deptId)); // Converts "3" to 3 for the DB
+            pstmt.setInt(2, Integer.parseInt(deptId));
             pstmt.setString(3, courses);
             pstmt.setString(4, email);
             pstmt.setString(5, mobile);
+            pstmt.setString(6, name); // Used for user_id lookup
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException | NumberFormatException e) {
-            System.out.println("Database Error: " + e.getMessage());
+            System.out.println("Database Error (Add): " + e.getMessage());
             return false;
         }
     }
