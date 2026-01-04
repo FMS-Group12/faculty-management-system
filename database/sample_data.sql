@@ -2,6 +2,8 @@ INSERT INTO users (username, password, role) VALUES ("CS/2022/060","Sanda123","S
 
 INSERT INTO users (username, password, role) VALUES ("Silva","Silva123","LECTURER");
 
+INSERT INTO users( username, password, role) VALUES ('AD/2022/00','Admin123','ADMIN');
+
 INSERT INTO departments (name, hod, no_of_staff) VALUES ('Software Engineering', 'Dr.S.P.Kasthuri Arachchi', 25);
 
 INSERT INTO departments (name, hod, no_of_staff) VALUES ('Computer Systems Engineering', 'Prof.N.G.J.Dias', 32);
@@ -23,6 +25,7 @@ INSERT INTO lecturers(fullname, email, mobile_no, department_id,courses, user_id
 INSERT INTO courses(course_code, course_name, credits, lecturer_id) VALUES ('CSCI 21052','OOP',2,1);
 
 INSERT INTO enrollments(student_id, course_code, grade) VALUES ('CS/2022/060','CSCI 21052','A');
+
 
 
 
