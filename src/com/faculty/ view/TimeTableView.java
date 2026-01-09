@@ -39,7 +39,6 @@ public class TimeTableView extends JFrame {
         setSize(1000, 800);
         setLocationRelativeTo(null);
 
-        // Root Panel with Gradient
         JPanel rootPanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -161,7 +160,7 @@ public class TimeTableView extends JFrame {
         panel.add(lblSubtitle);
         panel.add(Box.createVerticalStrut(30));
 
-        // Glass Table Container
+   
         JPanel tableContainer = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
