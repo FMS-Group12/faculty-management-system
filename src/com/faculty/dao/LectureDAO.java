@@ -3,10 +3,7 @@ import java.util.*;
 
 public class LectureDAO {
 
-    /**
-     * READ: Fetches data using a LEFT JOIN to ensure lecturers with NULL
-     * user_id or department_id are still displayed.
-     */
+ 
     public Vector<Vector<Object>> getAllLecturers() {
         Vector<Vector<Object>> data = new Vector<>();
         String sql = "SELECT l.fullname, d.name, l.courses, l.email, l.mobile_no " +
@@ -33,9 +30,7 @@ public class LectureDAO {
         return data;
     }
 
-    /**
-     * Fetches department mapping for the ComboBox in the View.
-     */
+   
     public Map<String, Integer> getDepartmentMap() {
         Map<String, Integer> map = new LinkedHashMap<>();
         String sql = "SELECT department_id, name FROM departments";
@@ -51,10 +46,7 @@ public class LectureDAO {
         return map;
     }
 
-    /**
-     * CREATE: Logic to handle user_id lookup. If the name is not in the users table,
-     * user_id will be set to NULL.
-     */
+ 
     public boolean addLecturer(String name, String deptId, String courses, String email, String mobile) {
         // Subquery looks for user_id based on name; returns NULL if not found.
         String sql = "INSERT INTO lecturers (fullname, department_id, courses, email, mobile_no, user_id) " +
@@ -77,9 +69,7 @@ public class LectureDAO {
         }
     }
 
-    /**
-     * UPDATE: Updates record using the original email as the key.
-     */
+    
     public boolean updateLecturer(String name, String deptId, String courses, String email, String mobile, String originalEmail) {
         String sql = "UPDATE lecturers SET fullname=?, department_id=?, courses=?, email=?, mobile_no=? WHERE email=?";
 
@@ -100,9 +90,7 @@ public class LectureDAO {
         }
     }
 
-    /**
-     * DELETE: Removes record by email.
-     */
+  
     public boolean deleteLecturer(String email) {
         String sql = "DELETE FROM lecturers WHERE email=?";
 
@@ -117,3 +105,4 @@ public class LectureDAO {
         }
     }
 }
+
