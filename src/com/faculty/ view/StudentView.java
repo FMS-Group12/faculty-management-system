@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 
 
 public class StudentView extends JFrame {
+    private String currentStudentUser;
 
     private final Color CLR_BG_START   = new Color(20, 24, 42);
     private final Color CLR_BG_END     = new Color(40, 45, 70);
@@ -19,8 +20,9 @@ public class StudentView extends JFrame {
     private final Font FONT_SUB    = new Font("SansSerif", Font.PLAIN, 18);
     private final Font FONT_CARD   = new Font("SansSerif", Font.BOLD, 20);
 
-    public StudentView() {
-        initializeUI();
+    public StudentView(String username) {
+        this.currentStudentUser = username;
+        initializeUI(); // Move initializeUI here so it runs after name is set
     }
 
     private void initializeUI() {
@@ -71,7 +73,7 @@ public class StudentView extends JFrame {
 
         gridPanel.add(createNavCard("Profile", "Manage student profiles", e -> openView(new StudentProfileView())));
         gridPanel.add(createNavCard("Time Table", "Get to know your schedule", e -> openView(new TimeTableView("Student"))));
-        gridPanel.add(createNavCard("Courses", "Courses & Grades", e -> openView(new CourseEnrolled("Student"))));
+        gridPanel.add(createNavCard("Courses", "Courses & Grades", e -> openView(new CourseEnrolled(currentStudentUser))));
 
         return gridPanel;
     }
