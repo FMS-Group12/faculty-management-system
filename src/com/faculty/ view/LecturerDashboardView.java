@@ -12,7 +12,7 @@ public class LecturerDashboardView extends JFrame {
 
     private LectureDAO lectureDAO = new LectureDAO();
 
-    // --- MIDNIGHT GLASS PALETTE ---
+    
     private final Color CLR_BG_START   = new Color(20, 24, 42);
     private final Color CLR_BG_END     = new Color(40, 45, 70);
     private final Color CLR_GLASS_BG   = new Color(255, 255, 255, 15);
@@ -22,7 +22,7 @@ public class LecturerDashboardView extends JFrame {
     private final Color CLR_NAV_BAR    = new Color(15, 18, 32);
     private final Color CLR_LOGOUT     = new Color(255, 80, 80);
 
-    // Fonts
+    
     private final Font FONT_TITLE  = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
     private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 16);
     private final Font FONT_CELL   = new Font("SansSerif", Font.PLAIN, 14);
@@ -250,7 +250,7 @@ public class LecturerDashboardView extends JFrame {
         lecturerTable.setBackground(new Color(0,0,0,0));
         lecturerTable.setOpaque(false);
 
-        // Configuration for Full Row Selection
+        
         lecturerTable.setRowSelectionAllowed(true);
         lecturerTable.setColumnSelectionAllowed(false);
         lecturerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -264,7 +264,7 @@ public class LecturerDashboardView extends JFrame {
         header.setPreferredSize(new Dimension(0, 45));
         ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
-        // Row Selection Renderer
+        
         DefaultTableCellRenderer rowRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
@@ -340,4 +340,5 @@ public class LecturerDashboardView extends JFrame {
         field.setForeground(CLR_WHITE); field.setCaretColor(CLR_WHITE);
         return field;
     }
+
 }
