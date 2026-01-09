@@ -7,7 +7,7 @@ import java.awt.event.*;
 
 public class SignUpView extends JFrame {
 
-    // --- REFINED PREMIUM PALETTE ---
+    
     private final Color CLR_BG_START = new Color(20, 24, 42);
     private final Color CLR_BG_END = new Color(40, 45, 70);
     private final Color CLR_GLASS_BG = new Color(255, 255, 255, 15);
@@ -29,10 +29,10 @@ public class SignUpView extends JFrame {
         setUndecorated(true);
         setSize(550, 850);
         setLocationRelativeTo(null);
-        // Allows for transparent/rounded corners
+        
         setBackground(new Color(0, 0, 0, 0));
 
-        // --- MAIN BACKGROUND PANEL ---
+        
         JPanel mainPanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -40,19 +40,18 @@ public class SignUpView extends JFrame {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 GradientPaint gp = new GradientPaint(0, 0, CLR_BG_START, 0, getHeight(), CLR_BG_END);
                 g2d.setPaint(gp);
-                // If maximized, we don't need rounded corners
+            
                 int arc = (getExtendedState() == JFrame.MAXIMIZED_BOTH) ? 0 : 40;
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
             }
         };
         setContentPane(mainPanel);
 
-        // --- 1. TITLE BAR ---
         JPanel titleBar = new JPanel(new BorderLayout());
         titleBar.setOpaque(false);
         titleBar.setPreferredSize(new Dimension(getWidth(), 60));
 
-        // Dragging Logic
+        
         titleBar.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 mouseX = e.getX();
@@ -61,7 +60,7 @@ public class SignUpView extends JFrame {
         });
         titleBar.addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
-                // Only allow dragging if not maximized
+                
                 if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
                     setLocation(e.getXOnScreen() - mouseX, e.getYOnScreen() - mouseY);
                 }
@@ -71,11 +70,11 @@ public class SignUpView extends JFrame {
         JPanel windowControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 10));
         windowControls.setOpaque(false);
 
-        // Minimize Button
+        
         JButton btnMin = createControlBtn("—");
         btnMin.addActionListener(e -> setState(JFrame.ICONIFIED));
 
-        // Maximize/Restore Button
+        
         JButton btnMax = createControlBtn("⬜");
         btnMax.addActionListener(e -> {
             if (getExtendedState() == JFrame.MAXIMIZED_BOTH) {
@@ -83,12 +82,12 @@ public class SignUpView extends JFrame {
                 btnMax.setText("⬜");
             } else {
                 setExtendedState(JFrame.MAXIMIZED_BOTH);
-                btnMax.setText("❐"); // Restore icon
+                btnMax.setText("❐"); 
             }
             mainPanel.repaint();
         });
 
-        // Close Button
+        
         JButton btnClose = createControlBtn("✕");
         btnClose.addActionListener(e -> System.exit(0));
 
@@ -98,7 +97,7 @@ public class SignUpView extends JFrame {
         titleBar.add(windowControls, BorderLayout.EAST);
         mainPanel.add(titleBar, BorderLayout.NORTH);
 
-        // --- 2. CENTERED GLASS CARD ---
+        
         JPanel centerWrapper = new JPanel(new GridBagLayout());
         centerWrapper.setOpaque(false);
 
@@ -164,7 +163,7 @@ public class SignUpView extends JFrame {
         });
         contentPanel.add(btnLogin);
 
-        // --- ASSEMBLY ---
+        
         customGlass.add(contentPanel, BorderLayout.CENTER);
         centerWrapper.add(customGlass);
         mainPanel.add(centerWrapper, BorderLayout.CENTER);
@@ -318,6 +317,7 @@ public class SignUpView extends JFrame {
     }
 
 }
+
 
 
 
