@@ -10,21 +10,21 @@ import java.awt.event.MouseEvent;
 
 public class TimeTableView extends JFrame {
 
-  
-    private final Color CLR_BG_START   = new Color(20, 24, 42);
-    private final Color CLR_BG_END     = new Color(40, 45, 70);
-    private final Color CLR_GLASS_BG   = new Color(255, 255, 255, 15);
-    private final Color CLR_ACCENT     = new Color(212, 175, 55); // Gold
-    private final Color CLR_WHITE      = new Color(245, 245, 245);
-    private final Color CLR_NAV_BAR    = new Color(15, 18, 32);
-    private final Color CLR_LOGOUT     = new Color(255, 80, 80); // Red
+
+    private final Color CLR_BG_START = new Color(20, 24, 42);
+    private final Color CLR_BG_END = new Color(40, 45, 70);
+    private final Color CLR_GLASS_BG = new Color(255, 255, 255, 15);
+    private final Color CLR_ACCENT = new Color(212, 175, 55); // Gold
+    private final Color CLR_WHITE = new Color(245, 245, 245);
+    private final Color CLR_NAV_BAR = new Color(15, 18, 32);
+    private final Color CLR_LOGOUT = new Color(255, 80, 80); // Red
 
 
-    private final Font FONT_NAV      = new Font("SansSerif", Font.BOLD, 14);
-    private final Font FONT_TITLE    = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
+    private final Font FONT_NAV = new Font("SansSerif", Font.BOLD, 14);
+    private final Font FONT_TITLE = new Font("Inter", Font.ITALIC | Font.BOLD, 36);
     private final Font FONT_SUBTITLE = new Font("SansSerif", Font.PLAIN, 14);
-    private final Font FONT_HEADER   = new Font("SansSerif", Font.BOLD, 14);
-    private final Font FONT_CELL     = new Font("SansSerif", Font.PLAIN, 14);
+    private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 14);
+    private final Font FONT_CELL = new Font("SansSerif", Font.PLAIN, 14);
 
     private String currentStudentName;
 
@@ -71,7 +71,7 @@ public class TimeTableView extends JFrame {
         lblWelcome.setForeground(CLR_ACCENT);
         navPanel.add(lblWelcome, BorderLayout.WEST);
 
-     
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 22));
         buttonPanel.setOpaque(false);
 
@@ -80,19 +80,27 @@ public class TimeTableView extends JFrame {
         JButton btnCourses = createNavButton("Courses");
         JButton btnLogout = createNavButton("Logout");
 
-       
-        btnTimetable.setForeground(CLR_ACCENT);
-        btnTimetable.setBorder(new MatteBorder(0, 0, 2, 0, CLR_ACCENT));
 
-        
+        btnTimetable.setForeground(CLR_WHITE);
 
         btnLogout.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", JOptionPane.YES_NO_OPTION);
-            if(choice == JOptionPane.YES_OPTION) {
+            if (choice == JOptionPane.YES_OPTION) {
                 new SignInView().setVisible(true);
                 dispose();
             }
         });
+        btnProfile.addActionListener(e ->
+        {
+            new StudentProfileView().setVisible(true);
+            this.dispose();
+        });
+        btnCourses.addActionListener(e ->
+        {
+            new CourseEnrolled(currentStudentName).setVisible(true);
+            this.dispose();
+        });
+
 
         buttonPanel.add(btnProfile);
         buttonPanel.add(btnTimetable);
@@ -118,6 +126,7 @@ public class TimeTableView extends JFrame {
             public void mouseEntered(MouseEvent evt) {
                 btn.setForeground(CLR_ACCENT);
             }
+
             public void mouseExited(MouseEvent evt) {
                 if (text.equals("Logout")) btn.setForeground(CLR_LOGOUT);
                 else if (text.equals("Timetable")) btn.setForeground(CLR_ACCENT);
@@ -136,7 +145,7 @@ public class TimeTableView extends JFrame {
         panel.setOpaque(false);
         panel.setBorder(new EmptyBorder(20, 40, 40, 40));
 
-        JLabel lblTitle = new JLabel("class schedule");
+        JLabel lblTitle = new JLabel("Class Schedule");
         lblTitle.setFont(FONT_TITLE);
         lblTitle.setForeground(CLR_WHITE);
         lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -185,7 +194,10 @@ public class TimeTableView extends JFrame {
         };
 
         DefaultTableModel tableModel = new DefaultTableModel(data, columns) {
-            @Override public boolean isCellEditable(int row, int column) { return false; }
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         };
 
         JTable table = new JTable(tableModel);
@@ -194,17 +206,17 @@ public class TimeTableView extends JFrame {
         table.setForeground(CLR_WHITE);
         table.setShowGrid(false);
         table.setIntercellSpacing(new Dimension(0, 0));
-        table.setBackground(new Color(0,0,0,0));
+        table.setBackground(new Color(0, 0, 0, 0));
         table.setOpaque(false);
         table.setFillsViewportHeight(true);
 
-        
+
         JTableHeader header = table.getTableHeader();
         header.setDefaultRenderer(new HeaderRenderer());
         header.setBackground(new Color(255, 255, 255, 10));
         header.setPreferredSize(new Dimension(0, 50));
 
-        
+
         MidnightCellRenderer cellRenderer = new MidnightCellRenderer();
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
@@ -218,13 +230,12 @@ public class TimeTableView extends JFrame {
         return scrollPane;
     }
 
- 
 
     private class HeaderRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            label.setBackground(new Color(255,255,255,10));
+            label.setBackground(new Color(255, 255, 255, 10));
             label.setForeground(CLR_ACCENT); // Gold Text for Headers
             label.setHorizontalAlignment(SwingConstants.CENTER);
             label.setFont(FONT_HEADER);
@@ -245,28 +256,23 @@ public class TimeTableView extends JFrame {
                 c.setForeground(CLR_BG_START); // Dark text on Gold background
                 setFont(new Font("SansSerif", Font.BOLD, 16));
                 setHorizontalAlignment(SwingConstants.CENTER);
-                if (column == 3) setText("INTERVAL"); else setText("");
+                if (column == 3) setText("INTERVAL");
+                else setText("");
             } else {
                 // Standard Cells
-                c.setBackground(new Color(0,0,0,0)); // Transparent
+                c.setBackground(new Color(0, 0, 0, 0)); // Transparent
                 c.setForeground(CLR_WHITE);
                 setFont(FONT_CELL);
                 setHorizontalAlignment(SwingConstants.CENTER);
 
                 if (column == 0) {
                     // Time Column Border
-                    ((JComponent)c).setBorder(new MatteBorder(0, 0, 0, 1, new Color(255, 255, 255, 50)));
+                    ((JComponent) c).setBorder(new MatteBorder(0, 0, 0, 1, new Color(255, 255, 255, 50)));
                 } else {
-                    ((JComponent)c).setBorder(null);
+                    ((JComponent) c).setBorder(null);
                 }
             }
             return c;
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new TimeTableView("Kumar").setVisible(true);
-        });
     }
 }
