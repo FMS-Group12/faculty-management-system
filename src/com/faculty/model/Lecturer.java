@@ -1,17 +1,17 @@
 public class Lecturer {
 
-    private int lecturerId; // Added to match the degreeId pattern
+    private int lecturerId; 
     private String fullName;
     private String departmentName;
     private String courses;
     private String email;
     private String mobileNo;
 
-    // Default no-argument constructor (Added to match Degree pattern)
+ 
     public Lecturer() {
     }
 
-    // Full constructor
+ 
     public Lecturer(int lecturerId, String fullName, String departmentName, String courses, String email, String mobileNo) {
         this.lecturerId = lecturerId;
         this.fullName = fullName;
@@ -21,7 +21,7 @@ public class Lecturer {
         this.mobileNo = mobileNo;
     }
 
-    // Getters and Setters (Updated to match Degree pattern)
+   
     public int getLecturerId() {
         return lecturerId;
     }
@@ -69,4 +69,5 @@ public class Lecturer {
     public void setMobileNo(String mobileNo) {
         this.mobileNo = mobileNo;
     }
+
 }
