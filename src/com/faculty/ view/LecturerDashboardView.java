@@ -63,7 +63,7 @@ public class LecturerDashboardView extends JFrame {
         JButton btnSave = createRoundedButton("Save Changes", new Dimension(220, 45), CLR_ACCENT, 12);
         btnSave.addActionListener(e -> {
             refreshTableData();
-            JOptionPane.showMessageDialog(this, "Data Synchronized with Database!");
+            JOptionPane.showMessageDialog(this, "Changes Saved Successfully!");
         });
         bottomPanel.add(btnSave);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -342,3 +342,4 @@ public class LecturerDashboardView extends JFrame {
     }
 
 }
+
