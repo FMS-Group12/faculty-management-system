@@ -57,9 +57,11 @@ CREATE TABLE enrollments (
     student_id VARCHAR(20),
     course_code VARCHAR(20),
     grade VARCHAR(5),
+    credits INT,
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (course_code) REFERENCES courses(course_code)
 );
+
 
 
 
