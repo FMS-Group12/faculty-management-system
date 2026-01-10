@@ -35,8 +35,8 @@ public class StudentProfileView extends JFrame {
 
     private void initializeUI() {
         setTitle("Faculty Management System - Student Profile");
-        setSize(1000, 700);
-        setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel rootPanel = new JPanel(new BorderLayout()) {
