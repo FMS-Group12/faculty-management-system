@@ -26,8 +26,8 @@ public class AdminView extends JFrame {
     private void initializeUI() {
         setTitle("Faculty Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1100, 800);
-        setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(false);
 
 
         JPanel mainPanel = new JPanel(new BorderLayout()) {
