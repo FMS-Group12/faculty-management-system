@@ -187,9 +187,11 @@ public class DegreeDashboardView extends JFrame {
         degreeTable.setSelectionForeground(CLR_ACCENT);
         degreeTable.setShowGrid(false);
 
+
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        centerRenderer.setOpaque(false);
+        centerRenderer.setOpaque(true);
+
         for (int i = 0; i < degreeTable.getColumnCount(); i++) {
             degreeTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
@@ -258,7 +260,8 @@ public class DegreeDashboardView extends JFrame {
     }
     private void showEditDegreeDialog() {
         int selectedRow = degreeTable.getSelectedRow();
-        if (selectedRow == -1) return;
+        if (selectedRow == -1) { JOptionPane.showMessageDialog(this, "Select a row!"); return; }
+
 
         String oldName = (String) degreeTableModel.getValueAt(selectedRow, 0);
         JTextField txtDegree = new JTextField(oldName);
@@ -297,6 +300,10 @@ public class DegreeDashboardView extends JFrame {
                     degreeTableModel.removeRow(selectedRow);
                 }
             }
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, "Select a row!");
         }
     }
 }
