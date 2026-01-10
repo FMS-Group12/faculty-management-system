@@ -26,10 +26,13 @@ public class TimeTableView extends JFrame {
     private final Font FONT_HEADER = new Font("SansSerif", Font.BOLD, 14);
     private final Font FONT_CELL = new Font("SansSerif", Font.PLAIN, 14);
 
-    private String currentStudentName;
+    private String currentUsername;
+    private StudentDAO1 dao = new StudentDAO1();
+    private String studentFullName = "Student";
 
-    public TimeTableView(String studentName) {
-        this.currentStudentName = studentName;
+
+    public TimeTableView(String username) {
+        this.currentUsername = username;
         initializeUI();
     }
 
@@ -38,6 +41,10 @@ public class TimeTableView extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 800);
         setLocationRelativeTo(null);
+        Student1 s = dao.getStudentByUsername(currentUsername);
+        if (s != null) {
+            studentFullName = s.fullname;
+        }
 
         JPanel rootPanel = new JPanel(new BorderLayout()) {
             @Override
@@ -54,6 +61,8 @@ public class TimeTableView extends JFrame {
         rootPanel.add(createTopNavBar(), BorderLayout.NORTH);
 
         rootPanel.add(createTimetablePanel(), BorderLayout.CENTER);
+
+
     }
 
     // =========================================================
@@ -65,7 +74,7 @@ public class TimeTableView extends JFrame {
         navPanel.setBorder(new MatteBorder(0, 0, 1, 0, new Color(255, 255, 255, 30)));
         navPanel.setPreferredSize(new Dimension(getWidth(), 70));
 
-        JLabel lblWelcome = new JLabel("  Welcome, " + currentStudentName);
+        JLabel lblWelcome = new JLabel("  Welcome, " + studentFullName);
         lblWelcome.setFont(FONT_NAV);
         lblWelcome.setForeground(CLR_ACCENT);
         navPanel.add(lblWelcome, BorderLayout.WEST);
@@ -91,12 +100,12 @@ public class TimeTableView extends JFrame {
         });
         btnProfile.addActionListener(e ->
         {
-            new StudentProfileView().setVisible(true);
+            new StudentProfileView(currentUsername).setVisible(true);
             this.dispose();
         });
         btnCourses.addActionListener(e ->
         {
-            new CourseEnrolled(currentStudentName).setVisible(true);
+            new CourseEnrolled(currentUsername).setVisible(true);
             this.dispose();
         });
 
