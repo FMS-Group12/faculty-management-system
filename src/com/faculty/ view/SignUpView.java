@@ -1,5 +1,6 @@
 
 
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -7,7 +8,7 @@ import java.awt.event.*;
 
 public class SignUpView extends JFrame {
 
-    
+
     private final Color CLR_BG_START = new Color(20, 24, 42);
     private final Color CLR_BG_END = new Color(40, 45, 70);
     private final Color CLR_GLASS_BG = new Color(255, 255, 255, 15);
@@ -27,12 +28,12 @@ public class SignUpView extends JFrame {
 
     private void initializeUI() {
         setUndecorated(true);
-        setSize(550, 670);
+        setSize(550, 750);
         setLocationRelativeTo(null);
-        
+
         setBackground(new Color(0, 0, 0, 0));
 
-        
+
         JPanel mainPanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -40,7 +41,7 @@ public class SignUpView extends JFrame {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 GradientPaint gp = new GradientPaint(0, 0, CLR_BG_START, 0, getHeight(), CLR_BG_END);
                 g2d.setPaint(gp);
-            
+
                 int arc = (getExtendedState() == JFrame.MAXIMIZED_BOTH) ? 0 : 40;
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
             }
@@ -51,7 +52,7 @@ public class SignUpView extends JFrame {
         titleBar.setOpaque(false);
         titleBar.setPreferredSize(new Dimension(getWidth(), 60));
 
-        
+
         titleBar.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 mouseX = e.getX();
@@ -60,7 +61,7 @@ public class SignUpView extends JFrame {
         });
         titleBar.addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
-                
+
                 if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
                     setLocation(e.getXOnScreen() - mouseX, e.getYOnScreen() - mouseY);
                 }
@@ -70,11 +71,11 @@ public class SignUpView extends JFrame {
         JPanel windowControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 10));
         windowControls.setOpaque(false);
 
-        
+
         JButton btnMin = createControlBtn("—");
         btnMin.addActionListener(e -> setState(JFrame.ICONIFIED));
 
-        
+
         JButton btnMax = createControlBtn("⬜");
         btnMax.addActionListener(e -> {
             if (getExtendedState() == JFrame.MAXIMIZED_BOTH) {
@@ -82,12 +83,12 @@ public class SignUpView extends JFrame {
                 btnMax.setText("⬜");
             } else {
                 setExtendedState(JFrame.MAXIMIZED_BOTH);
-                btnMax.setText("❐"); 
+                btnMax.setText("❐");
             }
             mainPanel.repaint();
         });
 
-        
+
         JButton btnClose = createControlBtn("✕");
         btnClose.addActionListener(e -> System.exit(0));
 
@@ -97,7 +98,7 @@ public class SignUpView extends JFrame {
         titleBar.add(windowControls, BorderLayout.EAST);
         mainPanel.add(titleBar, BorderLayout.NORTH);
 
-        
+
         JPanel centerWrapper = new JPanel(new GridBagLayout());
         centerWrapper.setOpaque(false);
 
@@ -113,7 +114,7 @@ public class SignUpView extends JFrame {
             }
         };
         customGlass.setOpaque(false);
-        customGlass.setPreferredSize(new Dimension(460, 720));
+        customGlass.setPreferredSize(new Dimension(460, 650));
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
@@ -163,7 +164,7 @@ public class SignUpView extends JFrame {
         });
         contentPanel.add(btnLogin);
 
-        
+
         customGlass.add(contentPanel, BorderLayout.CENTER);
         centerWrapper.add(customGlass);
         mainPanel.add(centerWrapper, BorderLayout.CENTER);
@@ -227,7 +228,7 @@ public class SignUpView extends JFrame {
             buttons[i].setForeground(CLR_WHITE);
             buttons[i].setBorder(new RoundBorder(new Color(255, 255, 255, 40), 15));
             buttons[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
-
+            buttons[i].setContentAreaFilled(true);
             buttons[i].addActionListener(e -> {
                 for (JButton btn : buttons) {
                     btn.setBackground(new Color(255, 255, 255, 10));
@@ -236,6 +237,8 @@ public class SignUpView extends JFrame {
                 buttons[index].setBackground(CLR_ACCENT);
                 buttons[index].setForeground(CLR_BG_START);
                 selectedRole = roles[index];
+
+                rolePanel.repaint();
             });
             rolePanel.add(buttons[i]);
         }
