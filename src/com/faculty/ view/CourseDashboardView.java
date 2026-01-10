@@ -179,7 +179,7 @@ public class CourseDashboardView extends JFrame {
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        centerRenderer.setOpaque(false);
+        centerRenderer.setOpaque(true);
         for (int i = 0; i < courseTable.getColumnCount(); i++) {
             courseTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
@@ -242,7 +242,7 @@ public class CourseDashboardView extends JFrame {
     private void showEditCourseDialog() {
         int row = courseTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Select a course to edit.");
+             JOptionPane.showMessageDialog(this, "Select a row!");
             return;
         }
 
@@ -277,6 +277,11 @@ public class CourseDashboardView extends JFrame {
             if (JOptionPane.showConfirmDialog(this, "Delete " + code + "?", "Confirm", 0) == 0) {
                 if (courseController.deleteCourse(code)) loadCoursesFromDatabase();
             }
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, "Select a row!");
+
         }
     }
 
