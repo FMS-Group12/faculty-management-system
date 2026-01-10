@@ -27,7 +27,7 @@ public class SignUpView extends JFrame {
 
     private void initializeUI() {
         setUndecorated(true);
-        setSize(550, 850);
+        setSize(550, 670);
         setLocationRelativeTo(null);
         
         setBackground(new Color(0, 0, 0, 0));
@@ -317,6 +317,7 @@ public class SignUpView extends JFrame {
     }
 
 }
+
 
 
 
