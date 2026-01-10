@@ -66,7 +66,7 @@ public class StudentDashboardView extends JFrame {
         JButton btnSave = createRoundedButton("SAVE CHANGES", new Dimension(200, 40), CLR_ACCENT, 12);
         btnSave.addActionListener(e -> {
             loadStudentsFromDatabase();
-            JOptionPane.showMessageDialog(this, "Data Synchronized Successfully!");
+            JOptionPane.showMessageDialog(this, "Changes saved successfully!");
         });
 
         bottomPanel.add(btnSave);
@@ -338,3 +338,4 @@ public class StudentDashboardView extends JFrame {
 
 
 }
+
