@@ -22,7 +22,7 @@ public class StudentView extends JFrame {
 
     public StudentView(String username) {
         this.currentStudentUser = username;
-        initializeUI(); // Move initializeUI here so it runs after name is set
+        initializeUI(); 
     }
 
     private void initializeUI() {
@@ -71,7 +71,7 @@ public class StudentView extends JFrame {
         gridPanel.setOpaque(false);
         gridPanel.setBorder(new EmptyBorder(20, 50, 50, 50));
 
-        gridPanel.add(createNavCard("Profile", "Manage student profiles", e -> openView(new StudentProfileView())));
+        gridPanel.add(createNavCard("Profile", "Manage student profiles", e -> openView(new StudentProfileView(currentStudentUser))));
         gridPanel.add(createNavCard("Time Table", "Get to know your schedule", e -> openView(new TimeTableView("Student"))));
         gridPanel.add(createNavCard("Courses", "Courses & Grades", e -> openView(new CourseEnrolled(currentStudentUser))));
 
