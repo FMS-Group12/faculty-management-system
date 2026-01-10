@@ -24,7 +24,14 @@ INSERT INTO lecturers(fullname, email, mobile_no, department_id,courses, user_id
 
 INSERT INTO courses(course_code, course_name, credits, lecturer_id) VALUES ('CSCI 21052','OOP',2,1);
 
-INSERT INTO enrollments(student_id, course_code, grade) VALUES ('CS/01','CSCI 21052','A');
+INSERT INTO enrollments(student_id, course_code, grade) VALUES ('CS/01','CSCI 21052','A',2);
+
+INSERT INTO enrollments(student_id, course_code, grade) VALUES ('CS/01','CSCI 21062','A+',2);
+
+INSERT INTO enrollments(student_id, course_code, grade) VALUES ('CS/01','CSCI 21012','B',3);
+
+INSERT INTO enrollments(student_id, course_code, grade) VALUES ('CS/01','CSCI 21052','c+',4);
+
 
 
 
