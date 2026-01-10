@@ -274,7 +274,7 @@ public class LecturerDashboardView extends JFrame {
                 setHorizontalAlignment(JLabel.CENTER);
                 setOpaque(true);
                 if (isSelected) {
-                    setBackground(new Color(255, 255, 255, 30));
+                  setBackground(new Color(212, 175, 55, 60));
                     setForeground(CLR_ACCENT);
                 } else {
                     setBackground(new Color(0, 0, 0, 0));
@@ -343,5 +343,6 @@ public class LecturerDashboardView extends JFrame {
     }
 
 }
+
 
 
