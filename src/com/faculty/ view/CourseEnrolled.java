@@ -12,6 +12,10 @@ import java.util.Vector;
 public class CourseEnrolled extends JFrame {
 
     private EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+    private String username;
+    private String studentFullName;
+    private StudentDAO1 dao = new StudentDAO1();
+
 
     private final Color CLR_BG_START = new Color(20, 24, 42);
     private final Color CLR_BG_END   = new Color(40, 45, 70);
@@ -27,15 +31,18 @@ public class CourseEnrolled extends JFrame {
     private final Font FONT_HEADER  = new Font("SansSerif", Font.BOLD, 14);
     private final Font FONT_CELL    = new Font("SansSerif", Font.PLAIN, 14);
 
-    private String studentName;
 
-  
-    public CourseEnrolled(String studentName) {
-        this.studentName = studentName;
+
+
+    public CourseEnrolled(String username) {
+        this.username = username;
+        Student1 s = dao.getStudentByUsername(username);
+        if (s != null) studentFullName = s.fullname;
         initializeUI();
     }
 
-  
+
+
     private void initializeUI() {
         setTitle("Faculty Management System - Courses Enrolled");
         setSize(1000, 800);
@@ -62,7 +69,7 @@ public class CourseEnrolled extends JFrame {
         nav.setPreferredSize(new Dimension(1000, 70));
         nav.setBorder(new MatteBorder(0, 0, 1, 0, new Color(255, 255, 255, 30)));
 
-        JLabel lblWelcome = new JLabel("  Welcome, " + studentName);
+        JLabel lblWelcome = new JLabel("  Welcome, " + studentFullName);
         lblWelcome.setFont(FONT_NAV);
         lblWelcome.setForeground(CLR_ACCENT);
         nav.add(lblWelcome, BorderLayout.WEST);
@@ -100,12 +107,12 @@ public class CourseEnrolled extends JFrame {
                     break;
 
                 case "Profile":
-                    new StudentProfileView().setVisible(true);
+                    new StudentProfileView(username).setVisible(true);
                     this.dispose();
                     break;
 
                 case "Timetable":
-                    new TimeTableView("Student").setVisible(true); 
+                    new TimeTableView(username).setVisible(true);
                     this.dispose();
                     break;
 
@@ -170,7 +177,7 @@ public class CourseEnrolled extends JFrame {
         String[] columns = {"Course Code", "Course Name", "Credits", "Grade"};
 
         Vector<Vector<Object>> data =
-                enrollmentDAO.getEnrollmentsByUsername(studentName);
+                enrollmentDAO.getEnrollmentsByUsername(username);
 
         DefaultTableModel model =
                 new DefaultTableModel(data, new Vector<>(java.util.Arrays.asList(columns))) {
