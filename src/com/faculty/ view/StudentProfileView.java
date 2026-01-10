@@ -2,12 +2,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
 
 public class StudentProfileView extends JFrame {
-
-    // ===== COLOR PALETTE (MIDNIGHT THEME) =====
+    
     private final Color CLR_BG_START = new Color(20, 24, 42);
     private final Color CLR_BG_END   = new Color(40, 45, 70);
     private final Color CLR_GLASS_BG = new Color(255, 255, 255, 15);
@@ -16,28 +14,26 @@ public class StudentProfileView extends JFrame {
     private final Color CLR_FIELD_BG = new Color(45, 50, 75);
     private final Color CLR_NAV_BAR  = new Color(15, 18, 32);
     private final Color CLR_LOGOUT   = new Color(255, 80, 80);
-
-    // ===== FONTS =====
+    
     private final Font FONT_TITLE = new Font("Inter", Font.ITALIC | Font.BOLD, 34);
     private final Font FONT_LABEL = new Font("SansSerif", Font.BOLD, 14);
     private final Font FONT_FIELD = new Font("SansSerif", Font.PLAIN, 14);
     private final Font FONT_NAV   = new Font("SansSerif", Font.BOLD, 14);
-
-    // ===== FIELDS =====
+    
     private JTextField txtStudentId, txtName, txtEmail, txtMobile, txtDegree, txtUserId;
+    private JLabel lblWelcome;
 
     private StudentDAO1 dao = new StudentDAO1();
-    private String currentStudentName = "Student";
+    private String currentUsername;
+    private String studentDisplayName = "Student";
 
-    public StudentProfileView() {
+    public StudentProfileView(String username) {
+        this.currentUsername = username;
         initializeUI();
+        autoLoadProfile();
     }
 
-    // =====================================================
-    // MAIN UI
-    // =====================================================
     private void initializeUI() {
-
         setTitle("Faculty Management System - Student Profile");
         setSize(1000, 700);
         setLocationRelativeTo(null);
@@ -47,10 +43,7 @@ public class StudentProfileView extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
-                GradientPaint gp = new GradientPaint(
-                        0, 0, CLR_BG_START,
-                        0, getHeight(), CLR_BG_END
-                );
+                GradientPaint gp = new GradientPaint(0, 0, CLR_BG_START, 0, getHeight(), CLR_BG_END);
                 g2.setPaint(gp);
                 g2.fillRect(0, 0, getWidth(), getHeight());
             }
@@ -61,17 +54,13 @@ public class StudentProfileView extends JFrame {
         rootPanel.add(createProfilePanel(), BorderLayout.CENTER);
     }
 
-    // =====================================================
-    // NAV BAR (SAME AS TIMETABLE)
-    // =====================================================
     private JPanel createTopNavBar() {
-
         JPanel navPanel = new JPanel(new BorderLayout());
         navPanel.setBackground(CLR_NAV_BAR);
         navPanel.setPreferredSize(new Dimension(getWidth(), 70));
-        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, new Color(255,255,255,30)));
+        navPanel.setBorder(new MatteBorder(0, 0, 1, 0, new Color(255, 255, 255, 30)));
 
-        JLabel lblWelcome = new JLabel("  Welcome, " + currentStudentName);
+        lblWelcome = new JLabel("  Welcome, " + studentDisplayName);
         lblWelcome.setFont(FONT_NAV);
         lblWelcome.setForeground(CLR_ACCENT);
         navPanel.add(lblWelcome, BorderLayout.WEST);
@@ -84,68 +73,24 @@ public class StudentProfileView extends JFrame {
         JButton btnCourses   = createNavButton("Courses");
         JButton btnLogout    = createNavButton("Logout");
 
-        // Active page
-        btnProfile.setForeground(CLR_WHITE);
+        btnProfile.setForeground(CLR_ACCENT); 
 
-        btnTimetable.addActionListener(e -> {
-            new TimeTableView(currentStudentName).setVisible(true);
-            dispose();
-        });
-
-        btnCourses.addActionListener(e -> {
-            new CourseEnrolled(currentStudentName).setVisible(true);
-            dispose();
-        });
-
-
+        btnTimetable.addActionListener(e -> { new TimeTableView(currentUsername).setVisible(true); dispose(); });
+        btnCourses.addActionListener(e -> { new CourseEnrolled(currentUsername).setVisible(true); dispose(); });
         btnLogout.addActionListener(e -> {
-            if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm",
-                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, "Logout?", "Confirm", 0) == 0) {
                 new SignInView().setVisible(true);
                 dispose();
             }
         });
 
-        buttonPanel.add(btnProfile);
-        buttonPanel.add(btnTimetable);
-        buttonPanel.add(btnCourses);
-        buttonPanel.add(btnLogout);
-
+        buttonPanel.add(btnProfile); buttonPanel.add(btnTimetable);
+        buttonPanel.add(btnCourses); buttonPanel.add(btnLogout);
         navPanel.add(buttonPanel, BorderLayout.EAST);
         return navPanel;
     }
 
-    private JButton createNavButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(FONT_NAV);
-
-        btn.setForeground(text.equals("Logout") ? CLR_LOGOUT : CLR_WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setForeground(CLR_ACCENT);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (text.equals("Logout")) btn.setForeground(CLR_LOGOUT);
-                else if (text.equals("Profile")) btn.setForeground(CLR_ACCENT);
-                else btn.setForeground(CLR_WHITE);
-            }
-        });
-        return btn;
-    }
-
-    // =====================================================
-    // PROFILE FORM
-    // =====================================================
     private JPanel createProfilePanel() {
-
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
         panel.setBorder(new EmptyBorder(40, 120, 40, 120));
@@ -171,96 +116,88 @@ public class StudentProfileView extends JFrame {
         gbc.insets = new Insets(12, 12, 12, 12);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        txtStudentId = createField();
-        txtName      = createField();
-        txtEmail     = createField();
-        txtMobile    = createField();
-        txtDegree    = createField();
-        txtUserId    = createField();
+        txtStudentId = createField(false); 
+        txtName      = createField(true);
+        txtEmail     = createField(true);
+        txtMobile    = createField(true);
+        txtDegree    = createField(false); 
+        txtUserId    = createField(false); 
 
         addRow(formCard, gbc, 0, "Student ID", txtStudentId);
         addRow(formCard, gbc, 1, "Full Name", txtName);
-        addRow(formCard, gbc, 2, "Email", txtEmail);
+        addRow(formCard, gbc, 2, "Email Address", txtEmail);
         addRow(formCard, gbc, 3, "Mobile No", txtMobile);
-        addRow(formCard, gbc, 4, "Degree ID", txtDegree);
-        addRow(formCard, gbc, 5, "User ID", txtUserId);
+        addRow(formCard, gbc, 4, "Enrolled Degree", txtDegree);
+        addRow(formCard, gbc, 5, "System User ID", txtUserId);
 
         panel.add(formCard, BorderLayout.CENTER);
 
-        JButton btnFetch = createActionButton("FETCH DATA");
-        JButton btnSave  = createActionButton("SAVE CHANGES");
+        JButton btnSave = new JButton("SAVE CHANGES");
+        btnSave.setPreferredSize(new Dimension(220, 45));
+        btnSave.setBackground(CLR_ACCENT);
+        btnSave.setForeground(CLR_BG_START);
+        btnSave.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btnSave.addActionListener(e -> updateProfile());
 
-        btnFetch.addActionListener(e -> fetchStudentFromDB());
-        btnSave.addActionListener(e -> updateStudentInDB());
-
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 20));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 30));
         bottomPanel.setOpaque(false);
-        bottomPanel.add(btnFetch);
         bottomPanel.add(btnSave);
-
         panel.add(bottomPanel, BorderLayout.SOUTH);
+
         return panel;
     }
 
-    private void addRow(JPanel panel, GridBagConstraints gbc, int row,
-                        String label, JTextField field) {
-
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.weightx = 0;
+    private void addRow(JPanel p, GridBagConstraints gbc, int row, String label, JTextField field) {
+        gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0;
         JLabel lbl = new JLabel(label);
-        lbl.setForeground(CLR_WHITE);
-        lbl.setFont(FONT_LABEL);
-        panel.add(lbl, gbc);
+        lbl.setForeground(CLR_WHITE); lbl.setFont(FONT_LABEL);
+        p.add(lbl, gbc);
 
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        panel.add(field, gbc);
+        gbc.gridx = 1; gbc.weightx = 1;
+        p.add(field, gbc);
     }
 
-    private JTextField createField() {
+    private JTextField createField(boolean editable) {
         JTextField txt = new JTextField(30);
         txt.setFont(FONT_FIELD);
-        txt.setBackground(CLR_FIELD_BG);
-        txt.setForeground(CLR_WHITE);
+        txt.setBackground(editable ? CLR_FIELD_BG : new Color(30, 35, 55));
+        txt.setForeground(editable ? CLR_WHITE : new Color(150, 150, 150));
         txt.setCaretColor(CLR_WHITE);
+        txt.setEditable(editable);
+        txt.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(255,255,255,20)),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
         return txt;
     }
 
-    private JButton createActionButton(String text) {
+    private JButton createNavButton(String text) {
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(180, 40));
-        btn.setBackground(CLR_ACCENT);
-        btn.setForeground(CLR_BG_START);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
-        btn.setFocusPainted(false);
+        btn.setFont(FONT_NAV);
+        btn.setForeground(text.equals("Logout") ? CLR_LOGOUT : CLR_WHITE);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
-    // =====================================================
-    // DATABASE ACTIONS
-    // =====================================================
-    private void fetchStudentFromDB() {
-        String id = txtStudentId.getText().trim();
-        if (id.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Enter Student ID!");
-            return;
-        }
+   
+    private void autoLoadProfile() {
+        Student1 s = dao.getStudentByUsername(currentUsername);
+        if (s != null) {
+            studentDisplayName = s.fullname;
+            lblWelcome.setText("  Welcome, " + studentDisplayName);
 
-        Student1 s = dao.getStudentById(id);
-        if (s == null) {
-            JOptionPane.showMessageDialog(this, "Student not found!");
-            return;
+            txtStudentId.setText(s.student_id);
+            txtName.setText(s.fullname);
+            txtEmail.setText(s.email);
+            txtMobile.setText(s.mobile_no);
+            txtDegree.setText(s.degree_id); 
+            txtUserId.setText(s.user_id);
         }
-
-        txtName.setText(s.fullname);
-        txtEmail.setText(s.email);
-        txtMobile.setText(s.mobile_no);
-        txtDegree.setText(s.degree_id);
-        txtUserId.setText(s.user_id);
     }
 
-    private void updateStudentInDB() {
+    private void updateProfile() {
         Student1 s = new Student1(
                 txtStudentId.getText().trim(),
                 txtName.getText().trim(),
@@ -272,15 +209,9 @@ public class StudentProfileView extends JFrame {
 
         if (dao.updateStudent(s)) {
             JOptionPane.showMessageDialog(this, "Profile updated successfully!");
+            lblWelcome.setText("  Welcome, " + s.fullname);
         } else {
-            JOptionPane.showMessageDialog(this, "Update failed! Check database.");
+            JOptionPane.showMessageDialog(this, "Error: Could not update profile.");
         }
-    }
-
-    // =====================================================
-    // MAIN
-    // =====================================================
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new StudentProfileView().setVisible(true));
     }
 }
