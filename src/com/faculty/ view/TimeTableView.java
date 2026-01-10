@@ -64,10 +64,8 @@ public class TimeTableView extends JFrame {
 
 
     }
-
-    // =========================================================
+    
     // 1. NAVIGATION BAR
-    // =========================================================
     private JPanel createTopNavBar() {
         JPanel navPanel = new JPanel(new BorderLayout());
         navPanel.setBackground(CLR_NAV_BAR);
@@ -143,10 +141,8 @@ public class TimeTableView extends JFrame {
         });
         return btn;
     }
-
-    // =========================================================
+    
     // 2. TIMETABLE PAGE
-    // =========================================================
     private JPanel createTimetablePanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -187,10 +183,8 @@ public class TimeTableView extends JFrame {
 
         return panel;
     }
-
-    // =========================================================
+    
     // 3. TABLE HELPERS
-    // =========================================================
     private JScrollPane createTable() {
         String[] columns = {"Time", "MON", "TUE", "WED", "THU", "FRI"};
         Object[][] data = {
