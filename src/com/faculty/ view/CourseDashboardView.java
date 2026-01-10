@@ -66,7 +66,7 @@ public class CourseDashboardView extends JFrame {
             if (row != -1) {
                 showEditCourseDialog();
             } else {
-                JOptionPane.showMessageDialog(this, "Select a course record to update and save.");
+                JOptionPane.showMessageDialog(this, "Changes saved successfully!");
             }
         });
 
@@ -218,13 +218,24 @@ public class CourseDashboardView extends JFrame {
                 "Credits:", credF
         };
 
-        if (JOptionPane.showConfirmDialog(this, fields, "Add New Course", 2) == 0) {
+        if (JOptionPane.showConfirmDialog(this, fields, "Add New Course", JOptionPane.OK_CANCEL_OPTION) == 0) {
             try {
-                if (courseController.addCourse(codeF.getText(), nameF.getText(), Integer.parseInt(credF.getText()), lecF.getText())) {
-                    loadCoursesFromDatabase();
+                String code = codeF.getText();
+                String name = nameF.getText();
+                String lecturerName = lecF.getText();
+                int credits = Integer.parseInt(credF.getText());
+
+                int lecturerId = courseController.getLecturerIdByName(lecturerName);
+
+                if (lecturerId != -1) {
+                    if (courseController.addCourse(code, name, credits, lecturerId)) {
+                        loadCoursesFromDatabase();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Lecturer '" + lecturerName + "' not found!");
                 }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Input Error: Check credits number.");
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Credits must be a number.");
             }
         }
     }
@@ -245,8 +256,17 @@ public class CourseDashboardView extends JFrame {
         Object[] fields = { "Course Code:", codeF, "Course Name:", nameF, "Lecturer:", lecF, "Credits:", credF };
 
         if (JOptionPane.showConfirmDialog(this, fields, "Edit Course", 2) == 0) {
-            if (courseController.updateCourse(oldCode, codeF.getText(), nameF.getText(), lecF.getText(), Integer.parseInt(credF.getText()))) {
-                loadCoursesFromDatabase();
+            try {
+                int lecturerId = courseController.getLecturerIdByName(lecF.getText());
+                if (lecturerId != -1) {
+                    if (courseController.updateCourse(oldCode, codeF.getText(), nameF.getText(), lecturerId, Integer.parseInt(credF.getText()))) {
+                        loadCoursesFromDatabase();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Lecturer not found!");
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Invalid credit value.");
             }
         }
     }
