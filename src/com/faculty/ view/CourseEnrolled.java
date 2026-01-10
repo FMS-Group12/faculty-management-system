@@ -45,9 +45,9 @@ public class CourseEnrolled extends JFrame {
 
     private void initializeUI() {
         setTitle("Faculty Management System - Courses Enrolled");
-        setSize(1000, 800);
-        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(false);
 
         JPanel rootPanel = new JPanel(new BorderLayout()) {
             protected void paintComponent(Graphics g) {
