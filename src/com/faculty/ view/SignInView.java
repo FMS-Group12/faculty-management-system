@@ -25,7 +25,7 @@ public class SignInView extends JFrame {
 
     private void initializeUI() {
         setUndecorated(true);
-        setSize(550, 670);
+        setSize(550, 750);
         setLocationRelativeTo(null);
         setBackground(new Color(0, 0, 0, 0));
 
@@ -292,4 +292,5 @@ public class SignInView extends JFrame {
             g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
         }
     }
+
 }
