@@ -39,7 +39,7 @@ public class DepartmentDashboardView extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Faculty Management System - Midnight Edition");
+        setTitle("Faculty Management System - Department Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setUndecorated(false);
