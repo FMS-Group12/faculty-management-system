@@ -39,8 +39,8 @@ public class TimeTableView extends JFrame {
     private void initializeUI() {
         setTitle("Faculty Management System - Student Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1000, 800);
-        setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(false);
         Student1 s = dao.getStudentByUsername(currentUsername);
         if (s != null) {
             studentFullName = s.fullname;
